@@ -3,17 +3,9 @@ div(ng-include='"components/navbar/navbar.html"')
 .container
   .row
     .col-lg-12
-      button.btn Hello
-
-.container
-  .row
-    .col-lg-12
-      h1.page-header Features:
-      ul.nav.nav-tabs.nav-stacked.col-md-4.col-lg-4.col-sm-6(ng-repeat='thing in awesomeThings')
-        li
-          a(href='#', tooltip='{{thing.info}}')
-            | {{thing.name}}
-
+      div.btn-group-vertical
+        button.btn.btn-default.btn-activity(ng-repeat='activity in sequenceToday track by $index',role='group',ng-click='track(activity, $index)',ng-href='#',class='{{sequenceStates[$index]}}') {{activity}}
+      
 footer.footer
   .container
     p

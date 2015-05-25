@@ -15,7 +15,12 @@
     "lodash": "~2.4.1",
     "jade": "~1.2.0",
     "composable-middleware": "^0.3.0",
-    "connect-mongo": "^0.4.1"
+    "connect-mongo": "^0.4.1",
+    "request-json": "^0.5.3",
+    "basic-auth-connect": "^1.0.0",
+    "basic-auth": "^1.0.1",
+    "node-http-proxy": "^0.2.3",
+    "express-http-proxy": "^0.6.0"
   },
   "devDependencies": {
     "grunt": "~0.4.4",
