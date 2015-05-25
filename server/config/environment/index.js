@@ -3,6 +3,8 @@
 var path = require('path');
 var _ = require('lodash');
 
+var os = require('os');
+
 function requiredProcessEnv(name) {
   if(!process.env[name]) {
     throw new Error('You must set the ' + name + ' environment variable');
@@ -42,6 +44,11 @@ var all = {
   },
 
 };
+
+all.quantified_server = 'http://localhost:3000';
+if (os.hostname() === 'direct.sachachua.com') {
+  all.quantified_server = 'http://quantifiedawesome.com';
+}
 
 // Export the config object based on the NODE_ENV
 // ==============================================
