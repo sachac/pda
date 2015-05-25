@@ -4,6 +4,11 @@
 
 'use strict';
 var QUANTIFIED_SERVER = 'http://localhost:3000';
+var os = require('os');
+if (os.hostname() == 'direct.sachachua.com') {
+  QUANTIFIED_SERVER = 'http://quantifiedawesome.com';
+}
+
 var proxy = require('express-http-proxy');
 
 // Set default node environment to development
