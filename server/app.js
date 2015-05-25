@@ -5,7 +5,7 @@
 'use strict';
 var QUANTIFIED_SERVER = 'http://localhost:3000';
 var os = require('os');
-if (os.hostname() == 'direct.sachachua.com') {
+if (os.hostname() === 'direct.sachachua.com') {
   QUANTIFIED_SERVER = 'http://quantifiedawesome.com';
 }
 
@@ -23,7 +23,7 @@ var server = require('http').createServer(app);
 
 
 app.use(auth(function(user, pass) {
-  return user == 'sacha';
+  return user === 'sacha';
 }));
         
 app.use('/quantified', proxy(QUANTIFIED_SERVER, { forwardPath: function(req, res) {

@@ -1,10 +1,10 @@
 'use strict';
 
 function pdaCheckToken($scope, $http, $cookies) {
-  $scope.token = $cookies['QUANTIFIED_TOKEN'];
+  $scope.token = $cookies.QUANTIFIED_TOKEN;
   if (!$scope.token) {
     $http.get('/api/quantified/getToken').success(function(data) {
-      $cookies['QUANTIFIED_TOKEN'] = data.token;
+      $cookies.QUANTIFIED_TOKEN = data.token;
       $scope.token = data.token;
     });
   }
@@ -15,9 +15,9 @@ function pdaGetActivitySequence() {
   var homeSequence = ['Routines', 'Walk Other', 'Gardening', 'Nonfiction', 'Drawing', 'Personal Lunch', 'Ni No Kuni', 'Coding', 'Learn', 'Writing', 'Kitchen', 'Cook', 'Ni No Kuni', 'Routines', 'Sleep'];
   var weekendSequence = ['Routines', 'Walk Other', 'Gardening', 'Nonfiction', 'Drawing', 'Personal Lunch', 'Ni No Kuni', 'Laundry', 'Tidy', 'Kitchen', 'Cook', 'Ni No Kuni', 'Routines', 'Sleep'];
   var day = (new Date()).getDay();
-  if (day == 4) {
+  if (day === 4) {
     return workSequence;
-  } else if (day == 0 || day == 6) {
+  } else if (day === 0 || day === 6) {
     return weekendSequence;
   } else {
     return homeSequence;
@@ -38,7 +38,8 @@ angular.module('pda2App')
           console.log(activity, err, res);
           $scope.sequenceStates[$index] = 'success';
           console.log($scope.sequenceStates);
-        }).error(function(err, res) {
+        }).error(/*jshint unused: vars */
+          function(err, res) {
           $scope.sequenceStates[$index] = 'error';
         });
     };
