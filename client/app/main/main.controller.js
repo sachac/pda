@@ -1,7 +1,6 @@
 'use strict';
 
 function pdaCheckToken($scope, $http, $cookies) {
-  $scope.token = $cookies.QUANTIFIED_TOKEN;
   if (!$scope.token) {
     $http.get('/api/quantified/getToken').success(function(data) {
       $cookies.QUANTIFIED_TOKEN = data.token;
@@ -30,14 +29,14 @@ angular.module('pda2App')
     pdaCheckToken($scope, $http, $cookies);
     $scope.sequenceToday = pdaGetActivitySequence();
     $scope.sequenceStates = [];
+    $scope.lastIndex = 0;
     $scope.track = function(activity, $index) {
       $scope.sequenceStates[$index] = 'pending';
       $http.post('/quantified/time/track.json',
-                 {token: $scope.token, category: activity})
+                 {'auth_token': $scope.token, category: activity})
         .success(function(err, res) {
-          console.log(activity, err, res);
           $scope.sequenceStates[$index] = 'success';
-          console.log($scope.sequenceStates);
+          $scope.lastIndex = $index;
         }).error(/*jshint unused: vars */
           function(err, res) {
           $scope.sequenceStates[$index] = 'error';
