@@ -11,6 +11,7 @@ angular.module('pda2App')
         });
       }
     };
+    loadData();
 
     $scope.menu = [{
       'title': 'Track',
@@ -38,6 +39,9 @@ angular.module('pda2App')
       var c = command || $scope.command;
       var commands = (command || $scope.command).split(/; */);
       var failed = false;
+      console.log('root', $rootScope.token);
+      console.log('regular', $scope.token);
+
       for (var i in commands) {
         var deferred = $q.defer();
         GroceryService.processCommand(
