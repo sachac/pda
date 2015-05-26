@@ -1,5 +1,4 @@
 div(ng-include='"components/navbar/navbar.html"')
-
 .container
   .row
     .col-lg-12
@@ -7,15 +6,23 @@ div(ng-include='"components/navbar/navbar.html"')
         button.btn.btn-default.btn-activity(ng-repeat='activity in sequenceToday track by $index',ng-click='track(activity, $index)',ng-href='#',class='{{sequenceStates[$index]}}',ng-show='$index >= lastIndex') {{activity}}
       p 
         a(href='http://quantifiedawesome.com') All
-.container
-  .row {{token}}
-
+  .row
+    .col-lg-12
+      div.btn-group-vertical
+        button.btn.btn-default.btn-activity(ng-repeat='category in categories track by $index',ng-click='trackById(category.id, $index)',ng-href='#',class='{{categories[$index].cssClass}}') {{category.full_name}}
+      p 
+        a(href='http://quantifiedawesome.com') All
       
+.container
+  .row
+    button.btn.btn-default(ng-click='login()',ng-href='#') Log in again
+    {{token}}
+
 footer.footer
   .container
     p
-      | Angular Fullstack v2.0.13
+      | Quantified PDA 
       = ' | '
-      a(href='https://twitter.com/tyhenkel') @tyhenkel
-      = ' | '
-      a(href='https://github.com/DaftMonk/generator-angular-fullstack/issues?state=open') Issues
+      a(href='https://twitter.com/sachac') @sachac
+
+

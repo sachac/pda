@@ -1,10 +1,18 @@
 'use strict';
 
-function pdaCheckToken($scope, $http, $cookies) {
+function loadData($scope, $http, localStorageService) {
+  $scope.token = localStorageService.get('QUANTIFIED_TOKEN');
   if (!$scope.token) {
     $http.get('/api/quantified/getToken').success(function(data) {
-      $cookies.QUANTIFIED_TOKEN = data.token;
+      localStorageService.set('QUANTIFIED_TOKEN', data.token);
       $scope.token = data.token;
+    });
+  }
+  $scope.categories = localStorageService.get('categories');
+  if (!$scope.categories) {
+    $http.get('/quantified/record_categories.json?all=1').success(function(data) {
+      localStorageService.set('categories', data);
+      $scope.categories = data;
     });
   }
 }
@@ -24,9 +32,8 @@ function pdaGetActivitySequence() {
 }
 
 angular.module('pda2App')
-  .controller('MainCtrl', function ($scope, $http, $rootScope, $cookies) {
-    $scope.awesomeThings = [];
-    pdaCheckToken($scope, $http, $cookies);
+  .controller('MainCtrl', function ($scope, $http, $rootScope, $cookies, localStorageService) {
+    loadData($scope, $http, localStorageService);
     $scope.sequenceToday = pdaGetActivitySequence();
     $scope.sequenceStates = [];
     $scope.lastIndex = 0;
@@ -41,5 +48,20 @@ angular.module('pda2App')
           function(err, res) {
           $scope.sequenceStates[$index] = 'error';
         });
+    };
+    $scope.trackById = function(id, $index) {
+      $scope.categories[$index].cssClass = 'pending';
+      $http.post('/quantified/time/track.json',
+                 {'auth_token': $scope.token, category_id: id})
+        .success(function(err, res) {
+          $scope.categories[$index].cssClass = 'success';
+        }).error(/*jshint unused: vars */
+          function(err, res) {
+            $scope.categories[$index].cssClass = 'error';
+        });
+    };
+    $scope.login = function() {
+      localStorageService.clearAll();
+      loadData($scope, $http, localStorageService);
     };
   });
