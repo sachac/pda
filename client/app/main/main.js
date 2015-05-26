@@ -7,5 +7,10 @@ angular.module('pda2App')
         url: '/',
         templateUrl: 'app/main/main.html',
         controller: 'MainCtrl'
+      })
+      .state('grocery_receipt', {
+        url: '/receipt',
+        templateUrl: 'app/grocery_receipt/grocery_receipt.html',
+        controller: 'MainCtrl'
       });
   });

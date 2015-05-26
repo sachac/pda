@@ -11,4 +11,14 @@ div.navbar.navbar-default.navbar-static-top(ng-controller='NavbarCtrl')
     div#navbar-main.navbar-collapse.collapse(collapse='isCollapsed')
       ul.nav.navbar-nav
         li(ng-repeat='item in menu', ng-class='{active: isActive(item.link)}')
-          a(ng-href='{{item.link}}') {{item.title}}
+          a(ng-href='#',ui-sref='{{item.state}}',ng-if='item.state') {{item.title}}
+          a(ng-href='{{item.link}}',ng-if='!item.state') {{item.title}}
+        li
+          a(ng-click='login()',ng-href='#') Relogin
+    .row.command-line
+      form(ng-submit='processCommand()')
+        Command
+        input.form-control(type='text',name='command',ng-model='command')
+        input(type='submit',style='display:none')
+        ul.feedback
+          li(ng-repeat='f in feedback', class='{{f.status}}') {{f.data}}

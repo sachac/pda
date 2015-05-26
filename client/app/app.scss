@@ -15,8 +15,10 @@ $fa-font-path: "/bower_components/font-awesome/fonts";
     padding: 0.2em 0;
 }
 
+.command-line { margin-bottom: 5px }
 // Component styles are injected through grunt
 // injector
+@import 'grocery_receipt/grocery_receipt.scss';
 @import 'main/main.scss';
 @import 'modal/modal.scss';
 // endinjector
