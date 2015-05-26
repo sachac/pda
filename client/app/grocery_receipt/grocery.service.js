@@ -36,12 +36,8 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       trackReceiptItem(item, token, function(data) {
         // success
         service.recognizedGroceryItems.push(data);
-        var output = 'Item tracked: ' + data.name + ' (' + (data.friendly_name || 'UNKNOWN') + ')';
-        if (item.unitPrice) {
-          output += ' -> ' + item.quantity + ' * ' + item.unitPrice + ' = ' + item.totalPrice;
-        } else {
-          output += ' -> ' + item.totalPrice;
-        }
+        var output = 'Item tracked: ' + data.name + ' (' + (data.receipt_item_type.friendly_name || 'UNKNOWN') + ')';
+        output += ' -> ' + data.quantity + ' * ' + data.unit_price + ' = ' + data.total;
         callback('success', output);
       }, function(data) {
         // error
