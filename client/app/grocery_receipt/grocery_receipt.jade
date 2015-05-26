@@ -2,6 +2,11 @@ div(ng-include='"components/navbar/navbar.html"')
 
 .container
   .row
-    button.btn.btn-default(ng-click='login()',ng-href='#') Log in again
-    {{token}}
-
+    table.table.table-condensed
+      tr(ng-repeat='itemType in incompleteItems track by $index')
+        td {{itemType.receipt_name}}
+        td {{itemType.friendly_name}}
+        td
+          input.form-control(ng-model='itemType.candidate_name')
+        td
+          select.form-control(ng-model='itemType.receipt_item_category_id',ng-blur='updateFriendlyName(itemType)',ng-options='category.id as category.name for category in categories track by category.id')

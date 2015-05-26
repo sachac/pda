@@ -15,7 +15,7 @@ function pdaGetActivitySequence() {
 }
 
 angular.module('pda2App')
-  .controller('MainCtrl', function ($scope, $http, $rootScope, $cookies, localStorageService) {
+  .controller('MainController', function ($scope, $http, $rootScope, $cookies, localStorageService) {
     $scope.categories = localStorageService.get('categories');
     if (!$scope.categories) {
       $http.get('/quantified/record_categories.json?all=1').success(function(data) {
