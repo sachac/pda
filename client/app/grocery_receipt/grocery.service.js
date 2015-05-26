@@ -198,7 +198,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
         $scope.commandFeedback = output;
       };
       if (!recentItems[itemType.id]) {
-        $http.get('/quantified/receipt_item_types/' + itemType.id + '/latest_receipt_items.json').success(function(data) {
+        $http.get('/quantified/receipt_item_types/' + itemType.id + '/latest_receipt_items.json?auth_token=' + token).success(function(data) {
           recentItems[itemType.id] = data;
           localStorageService.set('recentReceiptItemsByCategory', recentItems);
           addPrice(recentItems[itemType.id]);
