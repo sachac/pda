@@ -19,7 +19,11 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       service.date = today.toISOString();
       callback('success', 'Date set.');
     }
-    else if (c.match(/grocery mode/) || $state.current.name == 'grocery_receipt') {
+    else if (c.match(/grocery mode/)) {
+      $state.go('grocery_receipt');
+      callback('success', 'Now in grocery receipt mode');
+    }
+    else if ($state.current.name == 'grocery_receipt') {
       if (!service.date) {
         callback('error', 'Please specify date.');
         return;
@@ -28,17 +32,17 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
         callback('error', 'Please specify store.');
         return;
       }
-      
-      $state.go('grocery_receipt');
       var item = parseGroceryReceiptLine(c);
       trackReceiptItem(item, token, function(data) {
         // success
         service.recognizedGroceryItems.push(data);
-        if (data.friendly_name) {
-          callback('success', 'Item tracked: ' + data.name + ' (' + data.friendly_name + ')');
+        var output = 'Item tracked: ' + data.name + ' (' + (data.friendly_name || 'UNKNOWN') + ')';
+        if (item.unitPrice) {
+          output += ' -> ' + item.quantity + ' * ' + item.unitPrice + ' = ' + item.totalPrice;
         } else {
-          callback('success', 'Item tracked: ' + data.name);
+          output += ' -> ' + item.totalPrice;
         }
+        callback('success', output);
       }, function(data) {
         // error
         callback('error');
@@ -99,33 +103,54 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
   var parseGroceryReceiptLine = function(line) {
     var item = {};
     var matches;
-    if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+|[0-9]+) ([0-9]+\.[0-9]+|[0-9]+) *$/))) {
+    if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+|[0-9]+) ([0-9]+\.[0-9]+) *$/))) {
       // Units and unit price
       item.receiptLine = matches[1].toLowerCase();
       item.quantity = matches[2];
       item.unitPrice = matches[3];
     }
-    else if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+|[0-9]+) (kg) ([0-9]+\.[0-9]+|[0-9]+) *$/))) {
+    else if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+|[0-9]+) (kg) ([0-9]+\.[0-9]+) *$/))) {
       // Unit quantity, unit, unit price
       item.receiptLine = matches[1].toLowerCase();
       item.quantity = matches[2];
       item.unitLabel = matches[3];
       item.unitPrice = matches[4];
     }
-    else if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+|[0-9]+) *$/))) {
+    else if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+) *$/))) {
       // total price
       item.receiptLine = matches[1].toLowerCase();
       item.quantity = 1;
       item.unitPrice = matches[2];
       item.totalPrice = matches[3];
-    } else {
+    }
+    else if ((matches = line.match(/(.*) ([0-9]+) *$/))) {
+      // total price
+      item.receiptLine = matches[1].toLowerCase();
+      item.quantity = matches[2];
+    }
+    else {
       item.receiptLine = line;
+      item.quantity = 1;
     }
     return item;
   };
   
   var trackReceiptItem = function(item, token, successCallback, errorCallback) {
     getGroceryItemType(item.receiptLine, token, true, function(itemType) {
+      if (!item.totalPrice && !item.unitPrice && item.quantity) {
+        var cache = localStorageService.get('recentReceiptItemsByCategory') || [];
+        var recent = cache[itemType.id];
+        if (recent) {
+          if (recent[0].unit_price) {
+            item.unitPrice = recent[0].unit_price;
+          } else {
+            item.totalPrice = recent[0].total;
+          }
+        }
+      }
+      if (!item.totalPrice) {
+        item.totalPrice = parseFloat(item.quantity) * parseFloat(item.unitPrice);
+      }
       if (itemType) {
         $http.post('/quantified/receipt_items.json', {
           'auth_token': token,
@@ -138,9 +163,10 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
             'quantity': item.quantity,
             'unit': item.unitLabel,
             'unit_price': item.unitPrice,
-            'total_price': item.totalPrice || (parseFloat(item.unitQuantity) * parseFloat(item.unitPrice))
+            'total_price': item.totalPrice
           }}).success(successCallback).error(errorCallback);
-      } else {
+      }
+      else {
         errorCallback('Could not get item type category');
       }
     });
@@ -167,12 +193,13 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
 
       var recentItems = localStorageService.get('recentReceiptItemsByCategory') || [];
       var addPrice = function(data) {
-        output += ' - ' + data;
+        if (!data) return;
+        output += ' - ' + data.map(function(item) { return item.unit_price || item.total_price; }).join(', ');
         $scope.commandFeedback = output;
       };
       if (!recentItems[itemType.id]) {
         $http.get('/quantified/receipt_item_types/' + itemType.id + '/latest_receipt_items.json').success(function(data) {
-          recentItems[itemType.id] = data.map(function(item) { return item.unit_price || item.total_price; }).join(', ');
+          recentItems[itemType.id] = data;
           localStorageService.set('recentReceiptItemsByCategory', recentItems);
           addPrice(recentItems[itemType.id]);
         });
