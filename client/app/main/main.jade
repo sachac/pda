@@ -1,15 +1,15 @@
 div(ng-include='"components/navbar/navbar.html"')
 
 .container
-  .row {{token}}
-
-.container
   .row
     .col-lg-12
       div.btn-group-vertical
         button.btn.btn-default.btn-activity(ng-repeat='activity in sequenceToday track by $index',ng-click='track(activity, $index)',ng-href='#',class='{{sequenceStates[$index]}}',ng-show='$index >= lastIndex') {{activity}}
       p 
         a(href='http://quantifiedawesome.com') All
+.container
+  .row {{token}}
+
       
 footer.footer
   .container

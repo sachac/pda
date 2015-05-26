@@ -11,8 +11,8 @@ function pdaCheckToken($scope, $http, $cookies) {
 
 function pdaGetActivitySequence() {
   var workSequence = ['Routines', 'Subway', 'E1 Gen', 'Subway', 'Kitchen', 'Cook', 'Dinner', 'Kitchen', 'Drawing', 'Writing', 'Ni No Kuni', 'Routines', 'Sleep'];
-  var homeSequence = ['Routines', 'Walk Other', 'Gardening', 'Nonfiction', 'Drawing', 'Personal Lunch', 'Ni No Kuni', 'Coding', 'Learn', 'Writing', 'Kitchen', 'Cook', 'Ni No Kuni', 'Routines', 'Sleep'];
-  var weekendSequence = ['Routines', 'Walk Other', 'Gardening', 'Nonfiction', 'Drawing', 'Personal Lunch', 'Ni No Kuni', 'Laundry', 'Tidy', 'Kitchen', 'Cook', 'Ni No Kuni', 'Routines', 'Sleep'];
+  var homeSequence = ['Routines', 'Walk Other', 'Gardening', 'Nonfiction', 'Drawing', 'Personal Lunch', 'Ni No Kuni', 'Coding', 'Learn', 'Writing', 'Kitchen', 'Cook', 'Dinner', 'Kitchen', 'Routines', 'Relax', 'Ni No Kuni', 'Routines', 'Sleep'];
+  var weekendSequence = ['Routines', 'Walk Other', 'Gardening', 'Nonfiction', 'Drawing', 'Personal Lunch', 'Family', 'Ni No Kuni', 'Laundry', 'Tidy', 'Kitchen', 'Cook', 'Dinner', 'Kitchen', 'Routines', 'Relax', 'Ni No Kuni', 'Routines', 'Sleep'];
   var day = (new Date()).getDay();
   if (day === 4) {
     return workSequence;
