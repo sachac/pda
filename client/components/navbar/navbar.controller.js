@@ -42,6 +42,7 @@ angular.module('pda2App')
         var deferred = $q.defer();
         GroceryService.processCommand(
           commands[i],
+          $rootScope.token,
           function(status, data) {
             if (status === 'success') {
               deferred.resolve({status: status, data: data});

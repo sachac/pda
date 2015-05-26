@@ -3,7 +3,7 @@
 angular.module('pda2App').factory('GroceryService', function($http, localStorageService, $state, $rootScope) {
   var service = {};
   service.recognizedGroceryItems = [];
-  service.processCommand = function(command, callback) {
+  service.processCommand = function(command, token, callback) {
     var c = command;
     var matches;
     if ((matches = c.match(/^store (.*?) *$/))) {
@@ -31,7 +31,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       
       $state.go('grocery_receipt');
       var item = parseGroceryReceiptLine(c);
-      trackReceiptItem(item, function(data) {
+      trackReceiptItem(item, token, function(data) {
         // success
         service.recognizedGroceryItems.push(data);
         if (data.friendly_name) {
@@ -51,7 +51,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
   };
 
   
-  var getGroceryItemType = function(receiptLine, callback) {
+  var getGroceryItemType = function(receiptLine, callback, token) {
     var cached = localStorageService.get('groceryItemTypes');
     var continueProcessing = function(cached) {
       if (cached[receiptLine]) {
@@ -59,7 +59,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       } else {
         // Create the new receipt item type
         $http.post('/quantified/receipt_item_types.json', {
-          'auth_token': $rootScope.token,
+          'auth_token': token,
           'receipt_item_type': {
             'receipt_name': receiptLine,
             'friendly_name': ''
@@ -73,7 +73,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     };
     
     if (!cached) {
-      $http.get('/quantified/receipt_item_types.json', {auth_token: $rootScope.token}).success(function(data) {
+      $http.get('/quantified/receipt_item_types.json', {auth_token: token}).success(function(data) {
         for (var i = 0; i < data.length; i++) {
           cached[data[i].receipt_name.toLowerCase()] = data[i];
         }
@@ -113,12 +113,12 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     return item;
   };
   
-  var trackReceiptItem = function(item, successCallback, errorCallback) {
+  var trackReceiptItem = function(item, token, successCallback, errorCallback) {
     // Retrieve the name of the receipt type
-    getGroceryItemType(item.receiptLine, function(itemType) {
+    getGroceryItemType(item.receiptLine, token, function(itemType) {
       if (itemType) {
         $http.post('/quantified/receipt_items.json', {
-          'auth_token': $rootScope.token,
+          'auth_token': token,
           'receipt_item': {
             'receipt_item_type_id': itemType.id,
             'store': service.store,
