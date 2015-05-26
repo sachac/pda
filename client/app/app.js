@@ -4,6 +4,7 @@ angular.module('pda2App', [
   'ngCookies',
   'ngResource',
   'ngSanitize',
+  'LocalStorageModule',
   'ui.router',
   'ui.bootstrap'
 ])
