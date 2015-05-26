@@ -50,13 +50,23 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     var item = parseGroceryReceiptLine(c);
   };
 
+  var findGroceryItemInCache = function(search, cache) {
+    search = search.toLowerCase();
+    for (var key in cache) {
+      if (key.startsWith(search)) {
+        return cache[key];
+      }
+    }
+    return null;
+  };
   
-  var getGroceryItemType = function(receiptLine, token, callback) {
+  var getGroceryItemType = function(receiptLine, token, doCreate, callback) {
     var cached = localStorageService.get('groceryItemTypes');
     var continueProcessing = function(cached) {
-      if (cached[receiptLine]) {
-        callback(cached[receiptLine]);
-      } else {
+      var type = findGroceryItemInCache(receiptLine, cached);
+      if (type) {
+        callback(type);
+      } else if (doCreate) {
         // Create the new receipt item type
         $http.post('/quantified/receipt_item_types.json', {
           'auth_token': token,
@@ -67,7 +77,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
         }).success(function(data) {
           cached[data.receipt_name.toLowerCase()] = data;
           localStorageService.set('groceryItemTypes', cached);
-          callback(cached[receiptLine]);
+          callback(data);
         }).error(function(data) { callback(null); });
       }
     };
@@ -109,23 +119,22 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       item.unitPrice = matches[2];
       item.totalPrice = matches[3];
     } else {
-      item.receiptLine = matches[1];
+      item.receiptLine = line;
     }
     return item;
   };
   
   var trackReceiptItem = function(item, token, successCallback, errorCallback) {
-    console.log("The token I have is ", token);
-    // Retrieve the name of the receipt type
-    getGroceryItemType(item.receiptLine, token, function(itemType) {
+    getGroceryItemType(item.receiptLine, token, true, function(itemType) {
       if (itemType) {
         $http.post('/quantified/receipt_items.json', {
           'auth_token': token,
           'receipt_item': {
             'receipt_item_type_id': itemType.id,
             'store': service.store,
+            'source': 'PDA',
             'date': service.date,
-            'name': item.receiptLine,
+            'name': itemType.receipt_name,
             'quantity': item.quantity,
             'unit': item.unitLabel,
             'unit_price': item.unitPrice,
@@ -137,6 +146,42 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     });
   };
   
+  service.giveCommandFeedback = function(command, $scope, token) {
+    // Take the latest command
+    if ($state.current.name != 'grocery_receipt') return;
 
+    var commands = command.split(/; */);
+    var lastCommand = commands[commands.length - 1];
+    if (!lastCommand || lastCommand.match(/^(store|date|today)/)) return;
+    if (($scope.commandFeedback || '').startsWith(lastCommand)) return;
+
+    var item = parseGroceryReceiptLine(lastCommand);
+    var type = getGroceryItemType(item.receiptLine, token, false, function(itemType) {
+      if (!itemType) return;
+
+      var output = itemType.receipt_name;
+      if (itemType.friendly_name) {
+        output += ' (' + itemType.friendly_name + ')';
+      }
+      $scope.commandFeedback = output;
+
+      var recentItems = localStorageService.get('recentReceiptItemsByCategory') || [];
+      var addPrice = function(data) {
+        output += ' - ' + data;
+        $scope.commandFeedback = output;
+      };
+      if (!recentItems[itemType.id]) {
+        $http.get('/quantified/receipt_item_types/' + itemType.id + '/latest_receipt_items.json').success(function(data) {
+          recentItems[itemType.id] = data.map(function(item) { return item.unit_price || item.total_price; }).join(', ');
+          localStorageService.set('recentReceiptItemsByCategory', recentItems);
+          addPrice(recentItems[itemType.id]);
+        });
+      }
+      else {
+        addPrice(recentItems[itemType.id]);
+      }
+    });
+  };
+  
   return service;
 });

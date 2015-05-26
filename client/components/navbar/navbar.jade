@@ -18,7 +18,8 @@ div.navbar.navbar-default.navbar-static-top(ng-controller='NavbarCtrl')
     .row.command-line
       form(ng-submit='processCommand()')
         Command
-        input.form-control(type='text',name='command',ng-model='command')
+        input.form-control(type='text',name='command',ng-model='command',ng-keyup='giveCommandFeedback(command)')
         input(type='submit',style='display:none')
+        .command-feedback {{commandFeedback}}
         ul.feedback
           li(ng-repeat='f in feedback', class='{{f.status}}') {{f.data}}
