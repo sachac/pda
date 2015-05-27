@@ -52,6 +52,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
 
   var findGroceryItemInCache = function(search, cache) {
     search = search.toLowerCase();
+    if (cache[key]) return cache[key];
     for (var key in cache) {
       if (key.startsWith(search)) {
         return cache[key];
