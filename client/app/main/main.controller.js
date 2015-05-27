@@ -15,7 +15,7 @@ function pdaGetActivitySequence() {
 }
 
 angular.module('pda2App')
-  .controller('MainController', function ($scope, $http, $rootScope, $cookies, localStorageService) {
+  .controller('MainController', function ($scope, $http, localStorageService) {
     $scope.categories = localStorageService.get('categories');
     if (!$scope.categories) {
       $http.get('/quantified/record_categories.json?all=1').success(function(data) {
@@ -28,8 +28,7 @@ angular.module('pda2App')
     $scope.lastIndex = 0;
     $scope.track = function(activity, $index) {
       $scope.sequenceStates[$index] = 'pending';
-      $http.post('/quantified/time/track.json',
-                 {'auth_token': $rootScope.token, category: activity})
+      $http.post('/quantified/time/track.json', {category: activity})
         .success(function(err, res) {
           $scope.sequenceStates[$index] = 'success';
           $scope.lastIndex = $index;
@@ -40,8 +39,7 @@ angular.module('pda2App')
     };
     $scope.trackById = function(id, $index) {
       $scope.categories[$index].cssClass = 'pending';
-      $http.post('/quantified/time/track.json',
-                 {'auth_token': $rootScope.token, category_id: id})
+      $http.post('/quantified/time/track.json', {category_id: id})
         .success(function(err, res) {
           $scope.categories[$index].cssClass = 'success';
         }).error(/*jshint unused: vars */

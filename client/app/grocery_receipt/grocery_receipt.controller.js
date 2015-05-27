@@ -2,7 +2,7 @@ angular.module('pda2App').controller('GroceryReceiptController', function ($scop
   var cached = localStorageService.get('groceryItemTypes');
   var deferred = $q.defer();
   if (!cached) {
-    $http.get('/quantified/receipt_item_types.json?auth_token=' + $rootScope.token).success(function(data) {
+    $http.get('/quantified/receipt_item_types.json').success(function(data) {
       cached = {};
       for (var i = 0; i < data.length; i++) {
         cached[data[i].receipt_name.toLowerCase()] = data[i];
@@ -28,7 +28,7 @@ angular.module('pda2App').controller('GroceryReceiptController', function ($scop
   var cachedCategories = localStorageService.get('groceryItemCategories');
   $scope.categories = cachedCategories;
   if (!cachedCategories) {
-    $http.get('/quantified/receipt_item_categories.json?auth_token=' + $rootScope.token).success(function(data) {
+    $http.get('/quantified/receipt_item_categories.json').success(function(data) {
       cachedCategories = data;
       localStorageService.set('groceryItemCategories', data);
       $scope.categories = cachedCategories;
@@ -39,8 +39,7 @@ angular.module('pda2App').controller('GroceryReceiptController', function ($scop
     if (itemType.candidate_name) {
       $http.put('/quantified/receipt_item_types/' + itemType.id + '.json', {
         receipt_item_type: {id: itemType.id, user_id: itemType.user_id, 'friendly_name': itemType.candidate_name,
-                            'receipt_item_category_id': itemType.receipt_item_category_id},
-        auth_token: $rootScope.token}).success(function(data) {
+                            'receipt_item_category_id': itemType.receipt_item_category_id}}).success(function(data) {
           cached[itemType.receipt_name.toLowerCase()] = data;
           itemType.friendly_name = itemType.candidate_name;
           localStorageService.set('groceryItemTypes', cached);

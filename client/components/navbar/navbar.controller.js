@@ -2,20 +2,9 @@
 
 angular.module('pda2App')
   .controller('NavbarCtrl', function ($scope, $location, $http, localStorageService, $state, GroceryService, $rootScope, $q) {
-    var loadData = function() {
-      $rootScope.token = localStorageService.get('QUANTIFIED_TOKEN');
-      if (!$rootScope.token) {
-        $http.get('/api/quantified/getToken').success(function(data) {
-          localStorageService.set('QUANTIFIED_TOKEN', data.token);
-          $rootScope.token = data.token;
-        });
-      }
-    };
-    loadData();
-
     $scope.menu = [{
       'title': 'Track',
-      'state': 'main'
+      'state': 'track'
     }, {
       'title': 'Receipt',
       'state': 'grocery_receipt'
@@ -30,9 +19,9 @@ angular.module('pda2App')
       return route === $location.path();
     };
 
-    $scope.login = function() {
+    $scope.logout = function() {
+      $rootScope.token = null;
       localStorageService.clearAll();
-      loadData($scope, $http, localStorageService);
     };
     $scope.feedback = [];
     $scope.processCommand = function(command) {

@@ -1,0 +1,6 @@
+.container
+  form.form-signin(ng-submit='login()')
+    h2.form-signin-heading Please sign in
+    input.input-block-level(type="text", name="username", placeholder="Username", ng-model='username')
+    input.input-block-level(type="password", name="password", placeholder="Password", ng-model='password')
+    button.btn.btn-large.btn-primary(type="submit") Sign in

@@ -26,14 +26,3 @@ exports.getRecentRecords = function(req, res) {
   });
 };
 
-exports.getToken = function(req, res) {
-  var client = request.createClient(config.quantified_server);
-  var auth = require('basic-auth');
-  var user = auth(req);
-  client.post('api/v1/tokens.json',
-              {login: user.name, password: user.pass},
-              function(err, res2, body) {
-                res.json(body);
-              });
-  
-};

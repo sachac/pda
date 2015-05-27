@@ -3,7 +3,7 @@
 angular.module('pda2App').factory('GroceryService', function($http, localStorageService, $state, $rootScope) {
   var service = {};
   service.recognizedGroceryItems = [];
-  service.processCommand = function(command, token, callback) {
+  service.processCommand = function(command, callback) {
     var c = command;
     var matches;
     if ((matches = c.match(/^store (.*?) *$/))) {
@@ -33,7 +33,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
         return;
       }
       var item = parseGroceryReceiptLine(c);
-      trackReceiptItem(item, token, function(data) {
+      trackReceiptItem(item, function(data) {
         // success
         service.recognizedGroceryItems.push(data);
         var output = 'Item tracked: ' + data.name + ' (' + (data.receipt_item_type.friendly_name || 'UNKNOWN') + ')';
@@ -60,7 +60,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     return null;
   };
   
-  var getGroceryItemType = function(receiptLine, token, doCreate, callback) {
+  var getGroceryItemType = function(receiptLine, doCreate, callback) {
     var cached = localStorageService.get('groceryItemTypes');
     var continueProcessing = function(cached) {
       var type = findGroceryItemInCache(receiptLine, cached);
@@ -69,7 +69,6 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       } else if (doCreate) {
         // Create the new receipt item type
         $http.post('/quantified/receipt_item_types.json', {
-          'auth_token': token,
           'receipt_item_type': {
             'receipt_name': receiptLine,
             'friendly_name': ''
@@ -83,7 +82,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     };
     
     if (!cached) {
-      $http.get('/quantified/receipt_item_types.json?auth_token=' + token).success(function(data) {
+      $http.get('/quantified/receipt_item_types.json').success(function(data) {
         cached = {};
         for (var i = 0; i < data.length; i++) {
           cached[data[i].receipt_name.toLowerCase()] = data[i];
@@ -131,8 +130,8 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     return item;
   };
   
-  var trackReceiptItem = function(item, token, successCallback, errorCallback) {
-    getGroceryItemType(item.receiptLine, token, true, function(itemType) {
+  var trackReceiptItem = function(item, successCallback, errorCallback) {
+    getGroceryItemType(item.receiptLine, true, function(itemType) {
       if (!item.totalPrice && !item.unitPrice && item.quantity) {
         var cache = localStorageService.get('recentReceiptItemsByCategory') || [];
         var recent = cache[itemType.id];
@@ -149,7 +148,6 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       }
       if (itemType) {
         $http.post('/quantified/receipt_items.json', {
-          'auth_token': token,
           'receipt_item': {
             'receipt_item_type_id': itemType.id,
             'store': service.store,
@@ -168,7 +166,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     });
   };
   
-  service.giveCommandFeedback = function(command, $scope, token) {
+  service.giveCommandFeedback = function(command, $scope) {
     // Take the latest command
     if ($state.current.name != 'grocery_receipt') return;
 
@@ -178,7 +176,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     if (($scope.commandFeedback || '').startsWith(lastCommand)) return;
 
     var item = parseGroceryReceiptLine(lastCommand);
-    var type = getGroceryItemType(item.receiptLine, token, false, function(itemType) {
+    var type = getGroceryItemType(item.receiptLine, false, function(itemType) {
       if (!itemType) return;
 
       var output = itemType.receipt_name;
@@ -194,7 +192,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
         $scope.commandFeedback = output;
       };
       if (!recentItems[itemType.id]) {
-        $http.get('/quantified/receipt_item_types/' + itemType.id + '/latest_receipt_items.json?auth_token=' + token).success(function(data) {
+        $http.get('/quantified/receipt_item_types/' + itemType.id + '/latest_receipt_items.json').success(function(data) {
           recentItems[itemType.id] = data;
           localStorageService.set('recentReceiptItemsByCategory', recentItems);
           addPrice(recentItems[itemType.id]);

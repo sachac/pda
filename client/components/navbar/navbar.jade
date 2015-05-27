@@ -14,7 +14,7 @@ div.navbar.navbar-default.navbar-static-top(ng-controller='NavbarCtrl')
           a(ng-href='#',ui-sref='{{item.state}}',ng-if='item.state') {{item.title}}
           a(ng-href='{{item.link}}',ng-if='!item.state') {{item.title}}
         li
-          a(ng-click='login()',ng-href='#') Relogin
+          a(ng-click='logout()',ng-href='#') Log out
     .row.command-line
       form(ng-submit='processCommand()')
         Command

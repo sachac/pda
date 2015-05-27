@@ -8,6 +8,6 @@ var QUANTIFIED_SERVER = 'http://localhost:3000';
 var router = express.Router();
 
 router.get('/', controller.index);
-router.get('/getToken', controller.getToken);
+
 
 module.exports = router;
