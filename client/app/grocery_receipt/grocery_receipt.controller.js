@@ -38,11 +38,12 @@ angular.module('pda2App').controller('GroceryReceiptController', function ($scop
   $scope.updateFriendlyName = function(itemType) {
     if (itemType.candidate_name) {
       $http.put('/quantified/receipt_item_types/' + itemType.id + '.json', {
-        receipt_item_type: {id: itemType.id, user_id: itemType.user_id, 'friendly_name': itemType.candidate_name,
-                            'receipt_item_category_id': itemType.receipt_item_category_id}}).success(function(data) {
-          cached[itemType.receipt_name.toLowerCase()] = data;
-          itemType.friendly_name = itemType.candidate_name;
-          localStorageService.set('groceryItemTypes', cached);
+        receipt_item_type: {
+          id: itemType.id, user_id: itemType.user_id, 'friendly_name': itemType.candidate_name,
+          'receipt_item_category_id': itemType.receipt_item_category_id}}).success(function(data) {
+            itemType.friendly_name = itemType.candidate_name;
+            cached[itemType.receipt_name.toLowerCase()] = itemType;
+            localStorageService.set('groceryItemTypes', cached);
         }).error(function(data) {
           itemType.friendly_name = null;
         });

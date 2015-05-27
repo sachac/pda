@@ -9,4 +9,4 @@ div(ng-include='"components/navbar/navbar.html"')
         td
           input.form-control(ng-model='itemType.candidate_name')
         td
-          select.form-control(ng-model='itemType.receipt_item_category_id',ng-blur='updateFriendlyName(itemType)',ng-options='category.id as category.name for category in categories track by category.id')
+          select.form-control(ng-model='itemType.receipt_item_category_id',ng-blur='updateFriendlyName(itemType)',ng-options='category.id as category.name for category in categories')
