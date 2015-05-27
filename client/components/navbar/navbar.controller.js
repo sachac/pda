@@ -22,6 +22,7 @@ angular.module('pda2App')
     $scope.logout = function() {
       $rootScope.token = null;
       localStorageService.clearAll();
+      $state.go('login');
     };
     $scope.feedback = [];
     $scope.processCommand = function(command) {

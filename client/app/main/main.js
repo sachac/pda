@@ -18,4 +18,15 @@ angular.module('pda2App')
         templateUrl: 'app/login/login.html',
         controller: 'LoginController'
       });
-  });
+  })
+  .run(['$rootScope', '$state', '$stateParams',
+    function($rootScope, $state, $stateParams) {
+      $rootScope.$on('$stateChangeStart', function(event, toState, toStateParams) {
+        // track the state the user wants to go to; authorization service needs this
+        if (!$rootScope.token && toState.name != 'login') {
+          event.preventDefault();
+          $state.transitionTo('login');
+        }
+      });
+    }
+  ]);
