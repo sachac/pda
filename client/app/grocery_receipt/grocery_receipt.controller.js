@@ -15,9 +15,9 @@ angular.module('pda2App').controller('GroceryReceiptController', function ($scop
   $scope.lastShown = null;
   $scope.updateIncompleteItems = function(cached, numItems) {
     var incompleteItems = $scope.incompleteItems || [];
-    var startShowing = false;
+    var startShowing = !$scope.lastShown;
     for (var i in cached) {
-      if (!$scope.lastShown || i == $scope.lastShown) {
+      if (i == $scope.lastShown) {
         startShowing = true;
         continue;
       }
