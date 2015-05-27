@@ -18,7 +18,7 @@ div.navbar.navbar-default.navbar-static-top(ng-controller='NavbarCtrl')
     .row.command-line
       form(ng-submit='processCommand()')
         Command
-        input.form-control(type='text',name='command',ng-model='command',ng-keyup='giveCommandFeedback(command)')
+        input.form-control(type='text',name='command',ng-model='command',ng-keyup='giveCommandFeedback(command)',ng-model-options="{debounce: {'default': 500, 'blur': 0}}")
         input(type='submit',style='display:none')
         .command-feedback {{commandFeedback}}
         ul.feedback

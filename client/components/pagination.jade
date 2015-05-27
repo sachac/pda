@@ -1,0 +1,16 @@
+nav
+  ul.pagination.text-center(ng-show="paginator.pageCount() > 1")
+    li(ng-click="paginator.firstPage()", ng-class="paginator.isFirstPage() && 'disabled'")
+      a
+        i.glyphicon.glyphicon-fast-backward(ng-class="paginator.isFirstPage() && 'icon-white'")
+    li(ng-click="paginator.previousPage()", ng-class="paginator.isFirstPage() && 'disabled'")
+      a
+        i.glyphicon.glyphicon-step-backward(ng-class="paginator.isFirstPage() && 'icon-white'")
+    li(ng-click="paginator.setPage(i)", ng-repeat="i in [] | forLoop:0:paginator.pageCount()", ng-class="paginator.page==i && 'active'")
+      a {{i+1}}
+    li(ng-click="paginator.nextPage()", ng-class="paginator.isLastPage() && 'disabled'")
+      a
+        i.glyphicon.glyphicon-step-forward(ng-class="paginator.isLastPage() && 'icon-white'")
+    li(ng-click="paginator.lastPage()", ng-class="paginator.isLastPage() && 'disabled'")
+      a
+        i.glyphicon.glyphicon-fast-forward(ng-class="paginator.isLastPage() && 'icon-white'")

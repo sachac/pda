@@ -8,12 +8,12 @@ angular.module('pda2App')
     }, {
       'title': 'Receipt',
       'state': 'grocery_receipt'
+    }, {
+      'title': 'Receipt Types',
+      'state': 'grocery_item_types'
     }];
-    
+    $rootScope.command = '';
     $scope.isCollapsed = true;
-    // TODO Remove test data
-    $scope.store = 'no frills';
-    $scope.date = '2015-05-23';
     
     $scope.isActive = function(route) {
       return route === $location.path();
@@ -53,7 +53,8 @@ angular.module('pda2App')
       }
     };
     $scope.giveCommandFeedback = function(command) {
-      var c = command || $scope.command;
+      var c = command || $rootScope.command;
+      $rootScope.command = command;
       GroceryService.giveCommandFeedback(command, $scope, $rootScope.token);
     };
 
