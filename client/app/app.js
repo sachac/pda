@@ -15,7 +15,6 @@ angular.module('pda2App', [
           if (config.url.startsWith('/quantified/') && $rootScope.token) {
             config.url += ((config.url.indexOf('?') >= 0) ? '&' : '?')
               + 'auth_token=' + $rootScope.token;
-            console.log(config);
           }
           return config || $q.when(config);
         }
