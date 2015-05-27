@@ -19,10 +19,11 @@ angular.module('pda2App')
         controller: 'LoginController'
       });
   })
-  .run(['$rootScope', '$state', '$stateParams',
-    function($rootScope, $state, $stateParams) {
+  .run(['$rootScope', '$state', '$stateParams', 'localStorageService',
+        function($rootScope, $state, $stateParams, localStorageService) {
       $rootScope.$on('$stateChangeStart', function(event, toState, toStateParams) {
         // track the state the user wants to go to; authorization service needs this
+        $rootScope.token = $rootScope.token || localStorageService.get('token');
         if (!$rootScope.token && toState.name != 'login') {
           event.preventDefault();
           $state.transitionTo('login');
