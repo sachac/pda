@@ -34,7 +34,7 @@ angular.module('pda2App').controller('GroceryReceiptController', function ($scop
   };
   
   deferred.promise.then(function(cached) {
-    $scope.updateIncompleteItems(cached, 3);
+    $scope.updateIncompleteItems(cached, 10);
   });
   
   var cachedCategories = localStorageService.get('groceryItemCategories');
