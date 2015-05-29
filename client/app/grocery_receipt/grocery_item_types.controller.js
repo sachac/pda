@@ -21,12 +21,12 @@ angular.module('pda2App').controller('GroceryItemTypesController', function ($sc
       items[i].candidate_name = items[i].friendly_name;
     }
     items = items.sort(function(a, b) {
-      if (a.friendly_name < b.friendly_name) return -1;
-      if (a.friendly_name > b.friendly_name) return 1;
-      if (a.receipt_item_category_id < b.receipt_item_category_id) return -1;
-      if (a.receipt_item_category_id > b.receipt_item_category_id) return 1;
-      if (a.receipt_name < b.receipt_name) return -1;
-      if (a.receipt_name > b.receipt_name) return 1;
+      if (a.friendly_name.toLowerCase() < b.friendly_name.toLowerCase()) return -1;
+      if (a.friendly_name.toLowerCase() > b.friendly_name.toLowerCase()) return 1;
+      if (a.receipt_item_category_id.toLowerCase() < b.receipt_item_category_id.toLowerCase()) return -1;
+      if (a.receipt_item_category_id.toLowerCase() > b.receipt_item_category_id.toLowerCase()) return 1;
+      if (a.receipt_name.toLowerCase() < b.receipt_name.toLowerCase()) return -1;
+      if (a.receipt_name.toLowerCase() > b.receipt_name.toLowerCase()) return 1;
       return 0;
     });
     $scope.itemTypes = items;
