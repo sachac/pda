@@ -1,11 +1,13 @@
 div(ng-include='"components/navbar/navbar.html"')
-
+- var lastType
 .container
   .row
-    {{ $command }}
     table.table.table-condensed
       tbody
-        tr(ng-repeat='itemType in itemTypes | filter:command | paginate')
+        tr(ng-repeat='itemType in itemTypes | filter:command | paginate', ng-class='{duplicate: lastType && lastType.receipt_name.toLowerCase().trim() == itemType.receipt_name.toLowerCase().trim()}')
+          td
+            a(ng-if='itemType._index > 0', ng-click="mergeWith(itemType, itemTypes[itemType._index - 1], itemType._index)", ng-href='#')
+              i.glyphicon.glyphicon-arrow-up(title='Merge with above')
           td {{itemType.receipt_name}}
           td {{itemType.friendly_name}}
           td

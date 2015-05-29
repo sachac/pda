@@ -1,10 +1,10 @@
 angular.module('pda2App').controller('GroceryItemTypesController', function ($scope, $http, $rootScope, localStorageService, $q, Paginator) {
-  var cached = localStorageService.get('groceryItemTypes');
+  var cached = null; // localStorageService.get('groceryItemTypes');
   var deferred = $q.defer();
   if (!cached) {
     $http.get('/quantified/receipt_item_types.json').success(function(data) {
       cached = data;
-      localStorageService.set('groceryItemType');
+      localStorageService.set('groceryItemTypes', cached);
       deferred.resolve(cached);
     });
   } else {
@@ -19,7 +19,6 @@ angular.module('pda2App').controller('GroceryItemTypesController', function ($sc
     };
     for (i in items) {
       items[i].candidate_name = items[i].friendly_name;
-      items[i]._index = i;
     }
     items = items.sort(function(a, b) {
       if (a.friendly_name < b.friendly_name) return -1;
@@ -46,6 +45,17 @@ angular.module('pda2App').controller('GroceryItemTypesController', function ($sc
     });
   }
 
+  $scope.mergeWith = function(redundantType, mainType, index) {
+    $http.put('/quantified/receipt_item_types/' + redundantType.id + '/move_to/' + mainType.id + '.json').success(function() {
+      $rootScope.commandFeedback = 'Merged';
+      cached.splice(index, 1);
+      localStorageService.set('groceryItemTypes', cached);
+      $scope.itemTypes.splice(index, 1);
+    }).error(function(err) {
+      $rootScope.commandFeedback = 'Not merged ' + err;
+    });
+  };
+  
   $scope.updateFriendlyName = function(itemType, index) {
     var c = cached[index];
     $http.put('/quantified/receipt_item_types/' + itemType.id + '.json', {
@@ -55,7 +65,7 @@ angular.module('pda2App').controller('GroceryItemTypesController', function ($sc
       }})
       .success(function(data) {
         itemType.friendly_name = itemType.candidate_name;
-        cached[itemType._index] = itemType;  
+        cached[index] = itemType;  
         localStorageService.set('groceryItemTypes', cached);
       }).error(function(data) {
         itemType.friendly_name = null;
