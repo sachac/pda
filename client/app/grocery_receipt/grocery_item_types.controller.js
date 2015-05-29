@@ -26,7 +26,7 @@ angular.module('pda2App').controller('GroceryItemTypesController', function ($sc
       if (a.receipt_item_category_id < b.receipt_item_category_id) return -1;
       if (a.receipt_item_category_id > b.receipt_item_category_id) return 1;
       if ((a.receipt_name || '').toLowerCase() < (b.receipt_name || '').toLowerCase()) return -1;
-      if ((a.receipt_name || '').toLowerCase() > (b.receipt_name | '').toLowerCase()) return 1;
+      if ((a.receipt_name || '').toLowerCase() > (b.receipt_name || '').toLowerCase()) return 1;
       return 0;
     });
     $scope.itemTypes = items;
