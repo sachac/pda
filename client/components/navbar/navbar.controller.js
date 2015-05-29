@@ -33,7 +33,6 @@ angular.module('pda2App')
         var deferred = $q.defer();
         GroceryService.processCommand(
           commands[i],
-          $rootScope.token,
           function(status, data) {
             if (status === 'success') {
               deferred.resolve({status: status, data: data});
@@ -53,9 +52,9 @@ angular.module('pda2App')
       }
     };
     $scope.giveCommandFeedback = function(command) {
-      var c = command || $rootScope.command;
-      $rootScope.command = command;
+      var c = command || $scope.command || $rootScope.command;
+      if (!c) return;
       GroceryService.giveCommandFeedback(command, $scope, $rootScope.token);
     };
-
+    $scope.$watch('command', $scope.giveCommandFeedback);
   });
