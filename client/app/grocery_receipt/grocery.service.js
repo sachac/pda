@@ -10,18 +10,33 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       service.store = matches[1];
       callback('success', 'Store set.');
     }
+    else if ((matches = c.match(/^([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) *$/))) {
+      service.date = matches[1];
+      callback('success', 'Date set.');
+    }
     else if ((matches = c.match(/^date (.*?) *$/))) {
       service.date = matches[1];
       callback('success', 'Date set.');
     }
-    else if ((matches = c.match(/^today$/))) {
+    else if ((matches = c.match(/^today *$/))) {
       var today = new Date();
       service.date = today.toISOString();
       callback('success', 'Date set.');
     }
-    else if (c.match(/grocery mode/)) {
+    else if (c.match(/^grocery mode *$/)) {
       $state.go('grocery_receipt');
       callback('success', 'Now in grocery receipt mode');
+    }
+    else if (c.match(/^oops *$/)) {
+      // Delete the last record
+      if (service.lastRecord) {
+        $http.delete('/quantified/receipt_items/' + service.lastRecord.id).success(function() {
+          callback('success', 'Deleted ' + service.lastRecord.name);
+          service.lastRecord = null;
+        }).error(function() {
+          callback('error', 'Could not delete');
+        });
+      }
     }
     else if ($state.current.name == 'grocery_receipt') {
       if (!service.date) {
@@ -51,31 +66,42 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
   };
 
   var findGroceryItemInCache = function(search, cache) {
+    if (!search) return null;
     search = search.toLowerCase();
-    if (cache[key]) return cache[key];
-    for (var key in cache) {
-      if (key.startsWith(search)) {
+    var key;
+    for (key in cache) {
+      if (cache[key].receipt_name.toLowerCase() == search) {
+        return cache[key];
+      }
+    }
+    for (key in cache) {
+      if (cache[key].receipt_name.startsWith(search)) {
+        return cache[key];
+      }
+    }
+    for (key in cache) {
+      if (cache[key].friendly_name.toLowerCase().match(search)) {
         return cache[key];
       }
     }
     return null;
   };
   
-  var getGroceryItemType = function(receiptLine, doCreate, callback) {
+  var getGroceryItemType = function(item, doCreate, callback) {
     var cached = localStorageService.get('groceryItemTypes');
     var continueProcessing = function(cached) {
-      var type = findGroceryItemInCache(receiptLine, cached);
+      var type = findGroceryItemInCache(item.receiptLine, cached);
       if (type) {
         callback(type);
       } else if (doCreate) {
         // Create the new receipt item type
         $http.post('/quantified/receipt_item_types.json', {
           'receipt_item_type': {
-            'receipt_name': receiptLine,
-            'friendly_name': ''
+            'receipt_name': item.receiptLine,
+            'friendly_name': item.friendlyName
           }
         }).success(function(data) {
-          cached[data.receipt_name.toLowerCase()] = data;
+          cached.push(data);
           localStorageService.set('groceryItemTypes', cached);
           callback(data);
         }).error(function(data) { callback(null); });
@@ -84,10 +110,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     
     if (!cached) {
       $http.get('/quantified/receipt_item_types.json').success(function(data) {
-        cached = {};
-        for (var i = 0; i < data.length; i++) {
-          cached[data[i].receipt_name.toLowerCase()] = data[i];
-        }
+        cached = data;
         localStorageService.set('groceryItemTypes', cached);
         continueProcessing(cached);
       });
@@ -128,11 +151,16 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       item.receiptLine = line;
       item.quantity = 1;
     }
+    // Parse out the friendly name and category if specified
+    if ((matches = item.receiptLine.match(/^(.*) \((.*?)\)? *$/))) {
+      item.receiptLine = matches[1];
+      item.friendlyName = matches[2];
+    }
     return item;
   };
   
   var trackReceiptItem = function(item, successCallback, errorCallback) {
-    getGroceryItemType(item.receiptLine, true, function(itemType) {
+    getGroceryItemType(item, true, function(itemType) {
       if (!item.totalPrice && !item.unitPrice && item.quantity) {
         var cache = localStorageService.get('recentReceiptItemsByCategory') || [];
         var recent = cache[itemType.id];
@@ -159,7 +187,10 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
             'unit': item.unitLabel,
             'unit_price': item.unitPrice,
             'total_price': item.totalPrice
-          }}).success(successCallback).error(errorCallback);
+          }}).success(function(data) {
+            service.lastRecord = data;
+            successCallback(data);
+          }).error(errorCallback);
       }
       else {
         errorCallback('Could not get item type category');
@@ -177,7 +208,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     if (($scope.commandFeedback || '').startsWith(lastCommand)) return;
 
     var item = parseGroceryReceiptLine(lastCommand);
-    var type = getGroceryItemType(item.receiptLine, false, function(itemType) {
+    var type = getGroceryItemType(item, false, function(itemType) {
       if (!itemType) return;
 
       var output = itemType.receipt_name;
@@ -189,7 +220,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       var recentItems = localStorageService.get('recentReceiptItemsByCategory') || [];
       var addPrice = function(data) {
         if (!data) return;
-        output += ' - ' + data.map(function(item) { return item.unit_price || item.total_price; }).join(', ');
+        output += '<table class="table">' + data.map(function(item) { return '<tr><td class="align-left">' + (item.unit_price || item.total_price) + '</td><td>' + item.date + '</td></tr>'; }).join('') + '</table>';
         $scope.commandFeedback = output;
       };
       if (!recentItems[itemType.id]) {

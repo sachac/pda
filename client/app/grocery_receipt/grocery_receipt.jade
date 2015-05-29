@@ -1,0 +1,17 @@
+div(ng-include='"components/navbar/navbar.html"')
+
+.container
+  .row
+    table.table.table-condensed.table-bordered
+      tr(ng-repeat='item in receiptItems')
+        td {{item.date}}
+        td {{item.name}}
+        td {{item.friendly_name}}
+        td.text-right {{item.quantity}}
+        td.text-right {{item.unit_price | number:3}}
+        td.text-right {{item.total | number:2}}
+    a(ng-click='older()',href='#') Older entries
+    |  - 
+    a(ng-click='newer()',href='#') Newer entries
+      
+      

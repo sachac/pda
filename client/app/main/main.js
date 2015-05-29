@@ -10,7 +10,7 @@ angular.module('pda2App')
       })
       .state('grocery_receipt', {
         url: '/receipt',
-        templateUrl: 'app/main/blank.html',
+        templateUrl: 'app/grocery_receipt/grocery_receipt.html',
         controller: 'GroceryReceiptController'
       })
       .state('grocery_item_types', {
