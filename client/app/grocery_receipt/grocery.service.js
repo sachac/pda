@@ -80,7 +80,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       }
     }
     for (key in cache) {
-      if (cache[key].friendly_name.toLowerCase().match(search)) {
+      if (cache[key].friendly_name && cache[key].friendly_name.toLowerCase().match(search)) {
         return cache[key];
       }
     }
