@@ -20,9 +20,9 @@ var server = require('http').createServer(app);
 app.use(auth(function(user, pass) {
   return user === 'sacha';
 }));
-        
+
 app.use('/quantified', proxy(config.quantified_server, { forwardPath: function(req, res) {
-  return require('url').parse(req.url).path;  
+  return require('url').parse(req.url).path;
 }}));
 
 

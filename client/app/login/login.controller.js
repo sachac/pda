@@ -12,7 +12,7 @@ angular.module('pda2App')
         .success(function(data) {
           $rootScope.token = data.token;
           localStorageService.set('token', $rootScope.token);
-          $state.go('track');
+          $state.go('time');
       });
     };
   });

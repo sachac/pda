@@ -6,6 +6,9 @@ angular.module('pda2App')
       'title': 'Track',
       'state': 'track'
     }, {
+      'title': 'Time',
+      'state': 'time'
+    }, {
       'title': 'Receipt',
       'state': 'grocery_receipt'
     }, {
@@ -14,7 +17,7 @@ angular.module('pda2App')
     }];
     $rootScope.command = '';
     $scope.isCollapsed = true;
-    
+
     $scope.isActive = function(route) {
       return route === $location.path();
     };
