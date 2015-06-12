@@ -1,5 +1,7 @@
+var NUM_DAYS = 7;
+var BAR_HEIGHT = 10;
 angular.module('pda2App').controller('TimeController', function ($scope, $http, $rootScope, localStorageService) {
-  var start = new Date((new Date()).setHours(0,0,0,0) - 7 * 24 * 60 * 60 * 1000).toISOString();
+  var start = new Date((new Date()).setHours(0,0,0,0) - NUM_DAYS * 24 * 60 * 60 * 1000).toISOString();
   $http.get('/quantified/records.json?split=split&per_page=10000&category_type=activity&start=' + start).success(function(data) {
     $scope.records = data.entries;
   });
@@ -14,7 +16,6 @@ angular.module('pda2App').directive('timeGraph', function() {
       scope.$watch('data', function(value) {
         if (!scope.data) return;
         var secondsScale = d3.scale.linear().domain([0,86400]).range([0,63]);
-        var BAR_HEIGHT = 20;
         var chart = d3.select(element[0]);
         var startingDate = new Date(scope.data[0].timestamp).setHours(0,0,0,0) / 1000;
         var endingDate = new Date(scope.data[scope.data.length - 1].timestamp).setHours(0,0,0,0) / 1000;
