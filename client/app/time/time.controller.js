@@ -56,22 +56,34 @@ angular.module('pda2App').directive('timeGraph', function() {
             var totalScale = d3.scale.linear().domain([0, 86400]).range([0,33]);
             var categoryData = d3.nest()
                   .key(function(d) { return (new Date(d.timestamp)).setHours(0,0,0,0) / 1000; })
+                  .key(function(d) { return d.timestamp; })
                   .rollup(function(d) {
                     return d3.sum(d, function(g) { return g.duration; });
                   }).entries(scope.data.filter(function(d2) { return d2.record_category_id == d.record_category_id; }));
-            svg.selectAll('rect.total').data(categoryData).enter().append('rect')
-              .attr('class', 'total')
+            categoryData.forEach(function(o) {
+              // key, values
+              var durationSoFar = 0;
+              o.values.forEach(function(entry) {
+                entry.durationSoFar = durationSoFar;
+                entry.dayStart = o.key;
+                durationSoFar += entry.values;
+              });
+            });
+            var row = svg.selectAll('g.total').data(categoryData).enter()
+                  .append('g').attr('class', 'total');
+            row.selectAll('rect').data(function(d2) { return d2.values; })
+              .enter().append('rect')
               .attr('stroke', '#fff')
               .attr('width', function(d) { return secondsScale(d.values) + '%'; })
               .attr('height', BAR_HEIGHT)
-              .attr('x', '66%')
-              .attr('y', function(d) { return dayScale(d.key) * BAR_HEIGHT; })
+              .attr('x', function(d) { return (66 + secondsScale(d.durationSoFar)) + '%'; })
+              .attr('y', function(d) { return dayScale(d.dayStart) * BAR_HEIGHT; })
               .attr('fill', function(d) { return d.color || '#ccc'; });
           })
           .on('mouseout', function(d) {
             tooltip.transition().duration(500).style('opacity', 0);
             chart.selectAll('rect.day').filter(function(d2) { return d2.record_category_id == d.record_category_id; }).attr('fill', d.color || '#ccc');
-            chart.selectAll('rect.total').remove();
+            chart.selectAll('g.total').remove();
           });
 
       });
