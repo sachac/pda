@@ -22,7 +22,7 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
             return d3.sum(leaves, function(d) { return parseFloat(d.total); });
           })
           .entries(scope.data);
-    var HEIGHT = 90;
+    var SIZE = 300;
     var tooltip = d3.select('body').append('div')
           .attr('class', 'tooltip')
           .style('opacity', 0);
@@ -31,25 +31,41 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
           .value(function(d) { return d.values; })
           .children(function(d) { if ($.isArray(d.values)) { return d.values; } else { return null; } });
     var chart = d3.select(element[0]).append('svg')
-          .attr('viewBox', '0 0 1000 ' + HEIGHT)
-          .attr('width', '100%').attr('height', HEIGHT);
-    var x = d3.scale.linear().range([0, 1000]),
-        y = d3.scale.linear().range([0, HEIGHT]);
+          .attr('viewBox', '0 0 ' + SIZE + ' ' + SIZE)
+          .attr('width', SIZE).attr('height', SIZE)
+          .append('g')
+          .attr('transform', function(d) { return 'translate(' + (SIZE / 2) + ',' + (SIZE / 2) + ')'; });
+    var x = d3.scale.linear().range([0, 2 * Math.PI]),
+        y = d3.scale.linear().range([0, SIZE / 2]);
     var root = {'key': 'Total', 'values': catData};
     var cell = chart.selectAll('g')
           .data(partition(root))
           .enter()
-          .append('g')
-          .attr('overflow', 'hidden')
-          .attr('transform', function(d) { return 'translate(' + x(d.x) + ',' + y(d.y) + ')'; });
+          .append('g');
     var formatLabel = function(d) {
       return d.key + ': ' + d.value.toFixed(2);
     };
-    var rect = cell.append('rect')
+    var arc = d3.svg.arc()
+          .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+          .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+          .innerRadius(function(d) { return Math.max(0, y(d.y)); })
+          .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+
+    var arcTween = function(d) {
+      var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+      yd = d3.interpolate(y.domain(), [d.y, 1]),
+      yr = d3.interpolate(y.range(), [d.y ? 20 : 0, SIZE / 2]);
+      return function(d, i) {
+        return i
+          ? function(t) { return arc(d); }
+        : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+      };
+    };
+    
+    var block = cell.append('path')
+          .attr('d', arc)
           .attr('fill', '#ccc')
           .attr('stroke', '#fff')
-          .attr('width', function(d) { return x(d.dx); })
-          .attr('height', function(d) { return y(d.dy); })
           .on('mouseover', function(d) {
             tooltip.transition().duration(200)
               .style('opacity', 0.9);
@@ -63,17 +79,15 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
           })
           .on('click', function(d) {
             x.domain([d.x, d.x + d.dx]);
-            cell.transition().duration(700)
-              .attr('transform', function(d) { return 'translate(' + x(d.x) + ',' + y(d.y) + ')'; });
-            rect.transition().duration(700)
-              .attr('width', function(d) { return x(d.x + d.dx) - x(d.x); });
+            block.transition().duration(500)
+              .attrTween('d', arcTween(d));
             updateTable(scope, element, attrs, d);
           });
-    cell.append('text')
+/*    cell.append('text')
       .attr('x', 5)
       .attr('y', 20)
       .attr('width', function(d) { return x(d.dx) - 10; })
-      .text(formatLabel);
+      .text(formatLabel); */
   };
 
   var updateTable = function(scope, element, attrs, filter) {
