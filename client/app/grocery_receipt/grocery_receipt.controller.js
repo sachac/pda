@@ -85,7 +85,8 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
         // Display only the rows that match this category or any of the categories underneath it
         if (d.category_name == filter.key
             || d.friendly_name == filter.key
-            || d.name == filter.key) { return 'table-row'; }
+            || d.name == filter.key
+            || (filter.key == 'Uncategoried' && !d.category_name)) { return 'table-row'; }
       }
       return 'none';
     });
