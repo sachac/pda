@@ -6,8 +6,7 @@ angular.module('pda2App', [
   'ngSanitize',
   'LocalStorageModule',
   'ui.router',
-  'ui.bootstrap',
-  'ngDrag'
+  'ui.bootstrap'
 ])
   .config(function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
     $httpProvider.interceptors.push(function($q, $rootScope) {
