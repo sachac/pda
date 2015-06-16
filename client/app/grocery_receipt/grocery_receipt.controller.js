@@ -30,11 +30,12 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
     var partition = d3.layout.partition()
           .value(function(d) { return d.values; })
           .children(function(d) { if ($.isArray(d.values)) { return d.values; } else { return null; } });
+    var MARGIN = 100;
     var chart = d3.select(element[0]).append('svg')
-          .attr('viewBox', '0 0 ' + SIZE + ' ' + SIZE)
-          .attr('width', SIZE).attr('height', SIZE)
+          .attr('viewBox', '0 0 ' + (SIZE + MARGIN) + ' ' + (SIZE + MARGIN))
+          .attr('width', SIZE + MARGIN).attr('height', SIZE + MARGIN)
           .append('g')
-          .attr('transform', function(d) { return 'translate(' + (SIZE / 2) + ',' + (SIZE / 2) + ')'; });
+          .attr('transform', function(d) { return 'translate(' + ((SIZE + MARGIN) / 2) + ',' + ((SIZE + MARGIN) / 2) + ')'; });
     var x = d3.scale.linear().range([0, 2 * Math.PI]),
         y = d3.scale.linear().range([0, SIZE / 2]);
     var root = {'key': 'Total', 'values': catData};
@@ -61,7 +62,11 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
         : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
       };
     };
-    
+    var computeTextRotation = function(d) {
+      if (d.depth == 0) return 0;
+      var temp = (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
+      return temp;
+    };
     var block = cell.append('path')
           .attr('d', arc)
           .attr('fill', '#ccc')
@@ -83,6 +88,22 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
               .attrTween('d', arcTween(d));
             updateTable(scope, element, attrs, d);
           });
+    var text = cell.append('text')
+          .attr('transform', function(d) { return 'rotate(' + computeTextRotation(d) + ')'; })
+          .attr('x', function(d) {
+            return y(d.y); })
+          .attr('dx', '6')
+          .attr('dy', '.35em')
+          .style('font-size', 'x-small')
+          .text(formatLabel)
+          .attr('text-anchor',
+                function(d) {
+                  if (d.depth == 0)
+                    return 'middle';
+                  else
+                    return 'start';
+                }
+               );
 /*    cell.append('text')
       .attr('x', 5)
       .attr('y', 20)
