@@ -29,10 +29,8 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
           .attr('class', 'tooltip')
           .style('opacity', 0);
     var chart = d3.select(element[0]).append('svg')
-          .attr('viewBox', '0 0 750 400')
-          .attr('width', '100%').attr('height', 400);
-    var x = d3.scale.linear().range([0, 550]),
-        y = d3.scale.linear().range([0, 400]);
+          .attr('width', '100%');
+    var x = d3.scale.linear().range([0, chart.style('width')]);
     var ROW_HEIGHT = 20;
     var partition = d3.layout.partition()
           .value(function(d) { return d.values; })
@@ -62,9 +60,8 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
       var info = chart.selectAll('g').data(data, function(d) { return d.key; });
       var groups = info.enter().append('g');
       info.exit().remove();
-
+      chart.attr('height', data.length * ROW_HEIGHT);
       x.domain([0, data[0].value]);
-      y.domain([0, data.length]);
       var blocks = groups.append('rect').attr('fill', '#ccc').attr('stroke', '#fff')
             .attr('width', function(d) { return x(d.value); })
             .attr('height', 20)
@@ -114,5 +111,3 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
     }
   };
 });
-
-

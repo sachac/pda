@@ -3,5 +3,10 @@ div(ng-include='"components/navbar/navbar.html"')
 .container
   .row
     h1 Graph
-    = records
+    p
+      label Start:
+      div(date-input,ng-model='startDate')
+      label  End:
+      div(date-input,ng-model='endDate')
+      button(ng-click='update()') Update
     time-graph(chart-data='records')

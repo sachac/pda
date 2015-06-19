@@ -3,12 +3,12 @@ div(ng-include='"components/navbar/navbar.html"')
 .container
   .row
     p
-      label Start: 
-      input(type=date,ng-model='startDate')
-      label  End: 
-      input(type=date,ng-model='endDate')
+      label Start:
+      div(date-input,ng-model='startDate')
+      label  End:
+      div(date-input,ng-model='endDate')
       button(ng-click='update()') Update
-    receipt-analysis(chart-data='receiptItems')  
+    receipt-analysis(chart-data='receiptItems')
     table.table.table-condensed.table-bordered#receipt-items
       thead
         tr
@@ -19,5 +19,4 @@ div(ng-include='"components/navbar/navbar.html"')
           td.text-right Unit price
           td.text-right Total
       tbody
-      
-    
+
