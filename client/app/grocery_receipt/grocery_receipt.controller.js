@@ -12,6 +12,9 @@ angular.module('pda2App').controller('GroceryReceiptController', function ($scop
 
 });
 angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
+  var formatLabel = function(d) {
+    return d.key + ': ' + d.value.toFixed(2);
+  };
   var drawChart = function(scope, element, attrs) {
     if (!scope.data) return;
     // Draw the chart
@@ -22,110 +25,71 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
             return d3.sum(leaves, function(d) { return parseFloat(d.total); });
           })
           .entries(scope.data);
-    var SIZE = 300;
     var tooltip = d3.select('body').append('div')
           .attr('class', 'tooltip')
           .style('opacity', 0);
-    
+    var chart = d3.select(element[0]).append('svg')
+          .attr('viewBox', '0 0 750 400')
+          .attr('width', '100%').attr('height', 400);
+    var x = d3.scale.linear().range([0, 550]),
+        y = d3.scale.linear().range([0, 400]);
+    var ROW_HEIGHT = 20;
     var partition = d3.layout.partition()
           .value(function(d) { return d.values; })
           .children(function(d) { if ($.isArray(d.values)) { return d.values; } else { return null; } });
-    var MARGIN = 100;
-    var chart = d3.select(element[0]).append('svg')
-          .attr('viewBox', '0 0 ' + (SIZE + MARGIN) + ' ' + (SIZE + MARGIN))
-          .attr('width', SIZE + MARGIN).attr('height', SIZE + MARGIN)
-          .append('g')
-          .attr('transform', function(d) { return 'translate(' + ((SIZE + MARGIN) / 2) + ',' + ((SIZE + MARGIN) / 2) + ')'; });
-    var x = d3.scale.linear().range([0, 2 * Math.PI]),
-        y = d3.scale.linear().range([0, SIZE / 2]);
     var root = {'key': 'Total', 'values': catData};
-    var cell = chart.selectAll('g')
-          .data(partition(root))
-          .enter()
-          .append('g');
-    var formatLabel = function(d) {
-      return d.key + ': ' + d.value.toFixed(2);
+    // So that it calculates sums at every level
+    var partitionedData = partition(root);
+    var current = null;
+    var updateTable = function(scope, element, attrs, filter) {
+      console.log("Updating table", filter);
+      var tableRows = d3.select('#receipt-items tbody').selectAll('tr');
+      tableRows.transition().duration(100).style('display', function(d) {
+        if (filter && filter.key == 'Total') { return 'table-row'; }
+        if (filter) {
+          // Display only the rows that match this category or any of the categories underneath it
+          if (d.category_name == filter.key
+              || d.friendly_name == filter.key
+              || d.name == filter.key
+              || (filter.key == 'Uncategoried' && !d.category_name)) { return 'table-row'; }
+        }
+        return 'none';
+      });
     };
-    var arc = d3.svg.arc()
-          .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
-          .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
-          .innerRadius(function(d) { return Math.max(0, y(d.y)); })
-          .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+    var setupGraph = function(root) {
+      current = root;
+      var data = root.children.sort(function(a, b) { return b.value - a.value; });
+      var info = chart.selectAll('g').data(data, function(d) { return d.key; });
+      var groups = info.enter().append('g');
+      info.exit().remove();
 
-    var arcTween = function(d) {
-      var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
-      yd = d3.interpolate(y.domain(), [d.y, 1]),
-      yr = d3.interpolate(y.range(), [d.y ? 20 : 0, SIZE / 2]);
-      return function(d, i) {
-        return i
-          ? function(t) { return arc(d); }
-        : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
-      };
+      x.domain([0, data[0].value]);
+      y.domain([0, data.length]);
+      var blocks = groups.append('rect').attr('fill', '#ccc').attr('stroke', '#fff')
+            .attr('width', function(d) { return x(d.value); })
+            .attr('height', 20)
+            .attr('x', 0)
+            .attr('y', function(d, i) { return i * ROW_HEIGHT; });
+      var text = groups.append('text')
+            .text(formatLabel)
+            .attr('y', function(d, i) { return i * ROW_HEIGHT + 15; })
+            .attr('x', 5)
+            .style('font-size', 'x-small');
+      blocks.on('click', function(d) {
+        if (d.children) {
+          setupGraph(d);
+        }
+        d3.event.stopPropagation();
+      });
+      chart.on('click', function(d) {
+        console.log('Clicked background');
+        if (current && current.parent) { setupGraph(current.parent); }
+      });
+      updateTable(scope, element, attrs, root);
     };
-    var computeTextRotation = function(d) {
-      if (d.depth == 0) return 0;
-      var temp = (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
-      return temp;
-    };
-    var block = cell.append('path')
-          .attr('d', arc)
-          .attr('fill', '#ccc')
-          .attr('stroke', '#fff')
-          .on('mouseover', function(d) {
-            tooltip.transition().duration(200)
-              .style('opacity', 0.9);
-            tooltip.html(formatLabel(d))
-              .style('left', d3.event.pageX + 'px')
-              .style('top', (d3.event.pageY - 28) + 'px');
-            $rootScope.commandFeedback = formatLabel(d);
-          })
-          .on('mouseout', function(d) {
-            tooltip.transition().duration(500).style('opacity', 0);
-          })
-          .on('click', function(d) {
-            x.domain([d.x, d.x + d.dx]);
-            block.transition().duration(500)
-              .attrTween('d', arcTween(d));
-            updateTable(scope, element, attrs, d);
-          });
-    var text = cell.append('text')
-          .attr('transform', function(d) { return 'rotate(' + computeTextRotation(d) + ')'; })
-          .attr('x', function(d) {
-            return y(d.y); })
-          .attr('dx', '6')
-          .attr('dy', '.35em')
-          .style('font-size', 'x-small')
-          .text(formatLabel)
-          .attr('text-anchor',
-                function(d) {
-                  if (d.depth == 0)
-                    return 'middle';
-                  else
-                    return 'start';
-                }
-               );
-/*    cell.append('text')
-      .attr('x', 5)
-      .attr('y', 20)
-      .attr('width', function(d) { return x(d.dx) - 10; })
-      .text(formatLabel); */
+    setupGraph(partitionedData[0]);
   };
 
-  var updateTable = function(scope, element, attrs, filter) {
-    console.log("Updating table", filter);
-    var tableRows = d3.select('#receipt-items tbody').selectAll('tr');
-    tableRows.transition().duration(100).style('display', function(d) {
-      if (filter && filter.key == 'Total') { return 'table-row'; }
-      if (filter) {
-        // Display only the rows that match this category or any of the categories underneath it
-        if (d.category_name == filter.key
-            || d.friendly_name == filter.key
-            || d.name == filter.key
-            || (filter.key == 'Uncategoried' && !d.category_name)) { return 'table-row'; }
-      }
-      return 'none';
-    });
-  };
   var setupTable = function(scope, element, attrs, filter) {
     if (!scope.data) return;
     var table = d3.select('#receipt-items');
@@ -137,15 +101,15 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
     rows.append('td').attr('class', 'text-right').html(function(d) { return d.unit_price ? d.unit_price : null; });
     rows.append('td').attr('class', 'text-right').html(function(d) { return d.total; });
   };
-  
+
   return {
     restrict: 'AE',
     replace: false,
     scope: {data: '=chartData'},
     link: function(scope, element, attrs) {
       scope.$watch('data', function(value) {
-        drawChart(scope, element, attrs);
         setupTable(scope, element, attrs);
+        drawChart(scope, element, attrs);
       });
     }
   };
