@@ -4,7 +4,7 @@ div(ng-include='"components/navbar/navbar.html"')
   .row
     table.table.table-condensed
       tbody
-        tr(ng-repeat='itemType in (list = (itemTypes | filter:command | paginate)) track by $index', ng-class='{duplicate: lastType && lastType.receipt_name.toLowerCase().trim() == itemType.receipt_name.toLowerCase().trim()}',data-drag='true',jqyoui-draggable,data-drop='true',jqyoui-droppable)
+        tr(ng-repeat='itemType in (list = (itemTypes | filter:command)) track by $index', ng-class='{duplicate: lastType && lastType.receipt_name.toLowerCase().trim() == itemType.receipt_name.toLowerCase().trim()}',data-drag='true',jqyoui-draggable,data-drop='true',jqyoui-droppable)
           td(width=100)
             a(ng-if='itemType._index > 0', ng-click="mergeWith(itemType, list[$index - 1], itemType._index)", ng-href='#')
               i.glyphicon.glyphicon-arrow-up(title='Merge with above')
@@ -18,5 +18,4 @@ div(ng-include='"components/navbar/navbar.html"')
             input.form-control(ng-model='itemType.candidate_name')
           td
             select.form-control(ng-model='itemType.receipt_item_category_id',ng-blur='updateFriendlyName(itemType)',ng-options='category.id as category.name for category in categories')
-    paginator
-      
+

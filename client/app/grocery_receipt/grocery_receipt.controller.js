@@ -3,13 +3,26 @@ angular.module('pda2App').controller('GroceryReceiptController', function ($scop
   // 30 days ago
   $scope.startDate = new Date(Date.now() - 86400 * 1000 * 30);
   $scope.endDate = new Date();
+  $http.get('/quantified/receipt_item_categories.json').success(function(data) {
+    $scope.categories = data;
+  });
   $scope.update = function() {
     $http.get('/quantified/receipt_items.json?per_page=10000&start=' + $scope.startDate.toISOString().substr(0, 10) + '&end=' + $scope.endDate.toISOString().substr(0, 10)).success(function(data) {
       $scope.receiptItems = data.entries;
     });
   };
   $scope.update();
-
+  $scope.updateItem = function(item) {
+    if (item.receipt_item_category_id) {
+      for (var i = 0; i < $scope.categories.length; i++) {
+        if ($scope.categories[i].id == item.receipt_item_category_id) {
+          item.category_name = $scope.categories[i].name;
+        }
+      }
+    }
+    return $http.put('/quantified/receipt_items/' + item.id + '.json',
+                     {'receipt_item': item});
+  };
 });
 angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
   var formatLabel = function(d) {

@@ -8,15 +8,22 @@ div(ng-include='"components/navbar/navbar.html"')
       label  End:
       div(date-input,ng-model='endDate')
       button(ng-click='update()') Update
-    receipt-analysis(chart-data='receiptItems')
     table.table.table-condensed.table-bordered#receipt-items
       thead
         tr
           td Date
           td Name
           td Friendly name
+          td Category
           td.text-right Quantity
           td.text-right Unit price
           td.text-right Total
       tbody
-
+        tr(ng-repeat='item in receiptItems')
+          td(editable-text='item.date',onaftersave='updateItem(item)') {{item.date}}
+          td(editable-text='item.name',onaftersave='updateItem(item)') {{item.name}}
+          td(editable-text='item.friendly_name',onaftersave='updateItem(item)') {{item.friendly_name}}
+          td(editable-select='item.receipt_item_category_id',e-ng-options='c.id as c.name for c in categories',onaftersave='updateItem(item)') {{item.category_name}}
+          td.text-right(editable-text='item.quantity',onaftersave='updateItem(item)') {{item.quantity}}
+          td.text-right(editable-text='item.unit_price',onaftersave='updateItem(item)') {{item.unit_price | number:3}}
+          td.text-right(editable-text='item.total',onaftersave='updateItem(item)') {{item.total | number:2}}

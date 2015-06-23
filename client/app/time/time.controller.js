@@ -51,25 +51,27 @@ angular.module('pda2App').directive('timeGraph', function() {
             });
             o.total = durationSoFar;
           });
+          var startingPosition = 0.66 * $('svg').width();
           svg.selectAll('g.total').remove();
           var base = svg.selectAll('g.total').data(categoryData, function(d) { return d.key; });
-          var row = base.enter().append('g').attr('class', 'total');
+          var row = base.enter().append('g').attr('class', 'total')
+                .attr('transform', function(d) {
+                  return 'translate(' + startingPosition + ' ' +
+                    (dayScale(d.key) * BAR_HEIGHT) + ')';
+                });
           var rects = row.selectAll('rect').data(function(d2) { return d2.values; }, function(x) { return x.key; });
           rects.enter().append('rect')
             .attr('stroke', '#fff')
             .attr('width', function(d) { return secondsScale(d.values) + '%'; })
             .attr('height', BAR_HEIGHT)
-            .attr('x', function(d) { return (66 + secondsScale(d.durationSoFar)) + '%'; })
-            .attr('y', function(d) { return dayScale(d.dayStart) * BAR_HEIGHT; })
+            .attr('x', function(d) { return secondsScale(d.durationSoFar) + '%'; })
             .attr('fill', function(d) { return d.color || '#ccc'; });
           row.append('text')
-            .attr('x', '66%')
-            .attr('y', function(d, i) { return dayScale(d.key) * BAR_HEIGHT + 10; })
+            .attr('transform', 'translate(-3 ' + (BAR_HEIGHT - 1) + ')')
+            .attr('text-anchor', 'end')
             .style('font-size', 'x-small').text(function(d) {
-              var minutes = Math.round(d.total / 60);
-              var hours = Math.round(minutes / 60);
-              minutes = minutes % 60;
-              return hours + ':' + d3.format('02d')(minutes);
+              var hours = d.total / 3600.0;
+              return hours.toFixed(1);
             });
         };
 

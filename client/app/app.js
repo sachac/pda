@@ -5,9 +5,13 @@ angular.module('pda2App', [
   'ngResource',
   'ngSanitize',
   'LocalStorageModule',
+  'xeditable',
   'ui.router',
   'ui.bootstrap'
 ])
+.run(function(editableOptions) {
+  editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
+})
   .config(function ($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
     $httpProvider.interceptors.push(function($q, $rootScope) {
       return {
