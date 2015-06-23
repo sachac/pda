@@ -12,6 +12,9 @@ angular.module('pda2App')
       'title': 'Receipt',
       'state': 'grocery_receipt'
     }, {
+      'title': 'Receipt Analysis',
+      'state': 'grocery_analysis'
+    }, {
       'title': 'Receipt Types',
       'state': 'grocery_item_types'
     }];
