@@ -78,8 +78,9 @@ module.exports = function (grunt) {
           '<%= yeoman.client %>/{app,components}/**/*.spec.js',
           '<%= yeoman.client %>/{app,components}/**/*.mock.js'
         ],
-        tasks: ['newer:jshint:all']
+        tasks: ['newer:jshint:all', 'karma:unit:run']
       },
+      
       injectSass: {
         files: [
           '<%= yeoman.client %>/{app,components}/**/*.{scss,sass}'],
@@ -433,6 +434,13 @@ module.exports = function (grunt) {
         'svgmin'
       ]
     },
+    // Test settings
+    karma: {
+      unit: {
+        configFile: 'karma.conf.js',
+        singleRun: true
+      }
+    },
 
     mochaTest: {
       options: {
@@ -636,6 +644,7 @@ module.exports = function (grunt) {
         'concurrent:test',
         'injector',
         'autoprefixer',
+        'karma'
       ]);
     }
 

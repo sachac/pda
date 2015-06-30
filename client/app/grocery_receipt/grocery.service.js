@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('pda2App').factory('GroceryService', function($http, localStorageService, $state, $rootScope) {
-  var service = {};
+  var service = {store: 'no frills', date: (new Date()).toISOString()};
   service.recognizedGroceryItems = [];
   service.processCommand = function(command, callback) {
     var c = command;
@@ -51,7 +51,8 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       trackReceiptItem(item, function(data) {
         // success
         service.recognizedGroceryItems.push(data);
-        var output = 'Item tracked: ' + data.name + ' (' + (data.receipt_item_type.friendly_name || 'UNKNOWN') + ')';
+        console.log(data);
+        var output = 'Item tracked: ' + data.name + ' (' + (data.friendly_name || 'UNKNOWN') + ')';
         output += ' -> ' + data.quantity + ' * ' + data.unit_price + ' = ' + data.total;
         callback('success', output);
       }, function(data) {
@@ -70,12 +71,12 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     search = search.toLowerCase();
     var key;
     for (key in cache) {
-      if (cache[key].receipt_name.toLowerCase() == search) {
+      if (cache[key].receipt_name && cache[key].receipt_name.toLowerCase() == search) {
         return cache[key];
       }
     }
     for (key in cache) {
-      if (cache[key].receipt_name.startsWith(search)) {
+      if (cache[key].receipt_name && cache[key].receipt_name.startsWith(search)) {
         return cache[key];
       }
     }
@@ -216,7 +217,6 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
         output += ' (' + itemType.friendly_name + ')';
       }
       $scope.commandFeedback = output;
-
       var recentItems = localStorageService.get('recentReceiptItemsByCategory') || [];
       var addPrice = function(data) {
         if (!data) return;

@@ -1,11 +1,10 @@
 angular.module('pda2App').controller('GroceryItemTypesController', function ($scope, $http, $rootScope, localStorageService, $q, Paginator) {
-  $http.get('/quantified/receipt_item_types/batch_entry.json').success(function(data) {
+  $http.get('/quantified/receipt_item_types.json').success(function(data) {
     for (var i in data) {
       data[i].candidate_name = data[i].friendly_name;
     }
-    $scope.receiptItemTypes = data;
+    $scope.itemTypes = data;
   });
-  $scope.itemTypes = [];
   $http.get('/quantified/receipt_item_categories.json').success(function(data) {
     $scope.categories = data;
   });
