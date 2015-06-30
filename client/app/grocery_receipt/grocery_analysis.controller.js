@@ -7,8 +7,6 @@ angular.module('pda2App').controller('GroceryAnalysisController', function ($sco
     $scope.categories = data;
   });
   $scope.update = function() {
-    console.log($scope.startDate);
-    console.log($scope.endDate);
     $http.get('/quantified/receipt_items.json?per_page=10000&start=' + (new Date($scope.startDate)).toISOString().substr(0, 10) + '&end=' + (new Date($scope.endDate)).toISOString().substr(0, 10), {cache: true}).success(function(data) {
       $scope.receiptItems = data.entries;
     });
@@ -43,6 +41,7 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
     var tooltip = d3.select('body').append('div')
           .attr('class', 'tooltip')
           .style('opacity', 0);
+    d3.select(element[0]).select('svg').remove();
     var chart = d3.select(element[0]).append('svg')
           .attr('width', '100%');
     var x = d3.scale.linear().range([0, chart.style('width')]);
@@ -55,7 +54,6 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
     var partitionedData = partition(root);
     var current = null;
     var updateTable = function(scope, element, attrs, filter) {
-      console.log("Updating table", filter);
       var tableRows = d3.select('#receipt-items tbody').selectAll('tr');
       tableRows.transition().duration(100).style('display', function(d) {
         if (filter && filter.key == 'Total') { return 'table-row'; }
