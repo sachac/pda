@@ -4,7 +4,7 @@ div(ng-include='"components/navbar/navbar.html"')
   .row
     table.table.table-condensed
       tbody
-        tr(ng-repeat='itemType in (list = (itemTypes | filter:command)) track by $index', ng-class='{duplicate: lastType && lastType.receipt_name.toLowerCase().trim() == itemType.receipt_name.toLowerCase().trim()}',data-drag='true',jqyoui-draggable,data-drop='true',jqyoui-droppable)
+        tr(ng-repeat='itemType in itemTypes track by $index', ng-class='{duplicate: lastType && lastType.receipt_name.toLowerCase().trim() == itemType.receipt_name.toLowerCase().trim()}',data-drag='true',jqyoui-draggable,data-drop='true',jqyoui-droppable)
           td(width=100)
             a(ng-if='itemType._index > 0', ng-click="mergeWith(itemType, list[$index - 1], itemType._index)", ng-href='#')
               i.glyphicon.glyphicon-arrow-up(title='Merge with above')
@@ -12,10 +12,7 @@ div(ng-include='"components/navbar/navbar.html"')
               i.glyphicon.glyphicon-arrow-down(title='Merge with below')
             a(ng-href='http://quantifiedawesome.com/receipt_item_types/{{itemType.id}}/edit',target='_blank')
               i.glyphicon.glyphicon-pencil(title='Edit')
-          td {{itemType.receipt_name}}
-          td {{itemType.friendly_name}}
-          td
-            input.form-control(ng-model='itemType.candidate_name')
-          td
-            select.form-control(ng-model='itemType.receipt_item_category_id',ng-blur='updateFriendlyName(itemType)',ng-options='category.id as category.name for category in categories')
+          td(editable-text='itemType.receipt_name') {{itemType.receipt_name}}
+          td(editable-text='itemType.friendly_name',onaftersave='updateFriendlyName(itemType)') {{itemType.friendly_name}}
+          td(editable-select='itemType.receipt_item_category_id',e-ng-options='c.id as c.name for c in categories',onaftersave='updateFriendlyName(itemType)') {{itemType.category_name}}
 

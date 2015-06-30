@@ -18,22 +18,22 @@ angular.module('pda2App').controller('GroceryItemTypesController', function ($sc
       $rootScope.commandFeedback = 'Not merged ' + err;
     });
   };
-
-  $scope.updateFriendlyName = function(itemType, index) {
-    var c = cached[index];
+*/
+  $scope.updateFriendlyName = function(itemType) {
     $http.put('/quantified/receipt_item_types/' + itemType.id + '.json', {
       receipt_item_type: {
-        id: itemType.id, user_id: itemType.user_id, 'friendly_name': itemType.candidate_name,
-        'receipt_item_category_id': itemType.receipt_item_category_id
+        id: itemType.id,
+        user_id: itemType.user_id,
+        receipt_name: itemType.receipt_name,
+        friendly_name: itemType.friendly_name,
+        receipt_item_category_id: itemType.receipt_item_category_id
       }})
       .success(function(data) {
-        itemType.friendly_name = itemType.candidate_name;
-        cached[index] = itemType;
-        localStorageService.set('groceryItemTypes', cached);
-      }).error(function(data) {
-        itemType.friendly_name = null;
+        itemType.receipt_name = data.receipt_name;
+        itemType.friendly_name = data.friendly_name;
+        itemType.category_name = data.category_name;
       });
-  }; */
+  }; 
 }).filter('offset', function() {
   return function(input, start) {
     start = parseInt(start, 10);

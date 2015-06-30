@@ -76,7 +76,7 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
       }
     }
     for (key in cache) {
-      if (cache[key].receipt_name && cache[key].receipt_name.startsWith(search)) {
+      if (cache[key].receipt_name && cache[key].receipt_name.toLowerCase().startsWith(search)) {
         return cache[key];
       }
     }
@@ -125,27 +125,27 @@ angular.module('pda2App').factory('GroceryService', function($http, localStorage
     var matches;
     if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+|[0-9]+) ([0-9]+\.[0-9]+) *$/))) {
       // Units and unit price
-      item.receiptLine = matches[1].toLowerCase();
+      item.receiptLine = matches[1];
       item.quantity = matches[2];
       item.unitPrice = matches[3];
     }
     else if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+|[0-9]+) (kg) ([0-9]+\.[0-9]+) *$/))) {
       // Unit quantity, unit, unit price
-      item.receiptLine = matches[1].toLowerCase();
+      item.receiptLine = matches[1];
       item.quantity = matches[2];
       item.unitLabel = matches[3];
       item.unitPrice = matches[4];
     }
     else if ((matches = line.match(/(.*) ([0-9]+\.[0-9]+) *$/))) {
       // total price
-      item.receiptLine = matches[1].toLowerCase();
+      item.receiptLine = matches[1];
       item.quantity = 1;
       item.unitPrice = matches[2];
       item.totalPrice = matches[3];
     }
     else if ((matches = line.match(/(.*) ([0-9]+) *$/))) {
       // total price
-      item.receiptLine = matches[1].toLowerCase();
+      item.receiptLine = matches[1];
       item.quantity = matches[2];
     }
     else {

@@ -1,7 +1,8 @@
 div(ng-include='"components/navbar/navbar.html"')
 .container
   .row
-    receipt-analysis(chart-data='receiptItems')
+    div.total
+    receipt-analysis(chart-data='receiptItems',start='startDate',end='endDate')
     p
       label Start:
       div(date-input,ng-model='startDate')
