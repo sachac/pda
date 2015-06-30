@@ -75,7 +75,7 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
       info.exit().remove();
       chart.attr('height', data.length * ROW_HEIGHT);
       x.domain([0, data[0].value]);
-      var numDays = (scope.end.setHours(0,0,0,0) - scope.start.setHours(0,0,0,0)) / 86400000;
+      var numDays = ((new Date(scope.end)).setHours(0,0,0,0) - (new Date(scope.start)).setHours(0,0,0,0)) / 86400000;
       var average = root.value * 7 / numDays;
       d3.select('.total').html('Total: ' + root.value.toFixed(2) + ' Avg per week: ' + average.toFixed(2));
       var blocks = groups.append('rect').attr('fill', '#ccc').attr('stroke', '#fff')
