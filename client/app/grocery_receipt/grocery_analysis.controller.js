@@ -1,6 +1,6 @@
 angular.module('pda2App').controller('GroceryAnalysisController', function ($scope, $http, $rootScope, localStorageService, $q) {
   // Display the receipt being considered
-  // 30 days ago
+  // 6530 days ago
   $scope.startDate = new Date(Date.now() - 86400 * 1000 * 90);
   $scope.endDate = new Date();
   $http.get('/quantified/receipt_item_categories.json', {cache: true}).success(function(data) {
@@ -136,28 +136,35 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
     svg.selectAll('*').remove();
 
     var margin = {top: 30, right: 20, bottom: 30, left: 40},
-        width = 750 - margin.left - margin.right,
-        height = 100 - margin.top - margin.bottom;
+        width = 640 - margin.left - margin.right,
+        height = 200 - margin.top - margin.bottom;
     svg.attr('height', height + margin.top + margin.bottom);
     svg.attr('width', width + margin.left + margin.right);
     var g = svg.append('g').attr('class', 'scatterplot');
-    var dateFormat = d3.time.format('%b %d');
+    var dateFormat = d3.time.format('%Y-%m-%d');
+    var tickFormat;
+    if (numDays > 365) {
+      tickFormat = d3.time.format('%b %Y');
+    } else {
+      tickFormat = d3.time.format('%b %d');
+    }
+      
     // setup x 
     var xValue = function(d) { return new Date(d.key); }, // data -> value
         xScale = d3.time.scale().range([0, width]), // value -> display
         xMap = function(d) { return xScale(xValue(d));}, // data -> display
-        xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(dateFormat);
+        xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(tickFormat);
     // setup y
     var yValue = function(d) { return d.values.total;}, // data -> value
         yScale = d3.scale.linear().range([height, 0]), // value -> display
         yMap = function(d) { return yScale(yValue(d));}, // data -> display
         yAxis = d3.svg.axis().scale(yScale).orient("left");
 
-    var colorScale = d3.scale.linear().range(['green', 'red']);
+    var colorScale = d3.scale.linear().range(['blue', 'orange']);
     var cValue = function(d) { return d.values.unitPrice; };
     colorScale.domain([d3.min(data, cValue), d3.max(data, cValue)]);
 
-    var sizeScale = d3.scale.linear().range([0.5, 4]);
+    var sizeScale = d3.scale.linear().range([2, 2]);
     var sizeValue = function(d) { return d.values.quantity; };
     xScale.domain([new Date(minDate.getTime() - 86400000), maxDate]);
     yScale.domain([0, d3.max(data, yValue) + 5]);
@@ -185,6 +192,8 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Total price");
+    var line = d3.svg.line().x(xMap).y(yMap);
+    g.append('path').datum(data).attr('class', 'line').attr('d', line);
     // draw dots
     g.selectAll(".dot")
       .data(data)
@@ -193,15 +202,15 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
       .attr("r", function(d) { return sizeScale(sizeValue(d)); })
       .attr("cx", xMap)
       .attr("cy", yMap)
-      .style("fill", function(d) { return colorScale(cValue(d)); }) 
+      .style("fill", function(d) { return colorScale(cValue(d)); })
       .on("mouseover", function(d) {
         tooltip.transition()
           .duration(200)
           .style("opacity", .9);
-        tooltip.html(['Total: ' + yValue(d).toFixed(2),
-                      'Date: ' + dateFormat(xValue(d)),
-                      'Average: ' + cValue(d).toFixed(2),
-                      'Quantity: ' + sizeValue(d).toFixed(3)].join('<br />'))
+        tooltip.html(['Date: ' + dateFormat(new Date(d.key)),
+                      'Quantity: ' + d.values.quantity.toFixed(3),
+                      'Unit price: ' + d.values.unitPrice.toFixed(2),
+                      'Total: ' + d.values.total.toFixed(2)].join('<br />'))
           .style("left", (d3.event.pageX + 5) + "px")
           .style("top", (d3.event.pageY - 28) + "px");
       })

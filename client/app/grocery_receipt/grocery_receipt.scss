@@ -45,14 +45,19 @@
   stroke: #000;
   shape-rendering: crispEdges;
 }
+.axis text {
+    font-size: x-small
+}
 
 .dot {
-  stroke: #000;
+  opacity: 0.5
 }
 
 .tooltip {
   position: absolute;
   width: 200px;
-  height: 28px;
+  height: 100px;
   pointer-events: none;
 }
+
+.line { fill: none; stroke: rgba(1,1,1,0.1); }
