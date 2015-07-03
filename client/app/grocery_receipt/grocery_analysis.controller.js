@@ -137,7 +137,7 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
 
     var margin = {top: 30, right: 20, bottom: 30, left: 40},
         width = 640 - margin.left - margin.right,
-        height = 200 - margin.top - margin.bottom;
+        height = 150 - margin.top - margin.bottom;
     svg.attr('height', height + margin.top + margin.bottom);
     svg.attr('width', width + margin.left + margin.right);
     var g = svg.append('g').attr('class', 'scatterplot');
