@@ -53,6 +53,9 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
     setupGraph(element, scope.data, partitionedData[0]);
   }
   function updateTable(filter) {
+    var average = filter.value * 7 / numDays;
+    d3.select('.total').html('Total: ' + filter.value.toFixed(2) + ' Avg per week: ' + average.toFixed(2));
+
     var tableRows = d3.select('#receipt-items tbody').selectAll('tr');
     tableRows.transition().duration(100).style('display', function(d) {
       if (filter && filter.key == 'Total') { return 'table-row'; }
@@ -79,8 +82,6 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
     info.exit().remove();
     chart.attr('height', data.length * ROW_HEIGHT);
     x.domain([0, data[0].value]);
-    var average = root.value * 7 / numDays;
-    d3.select('.total').html('Total: ' + root.value.toFixed(2) + ' Avg per week: ' + average.toFixed(2));
     var blocks = groups.append('rect').attr('fill', '#ccc').attr('stroke', '#fff')
           .attr('width', function(d) { return x(d.value); })
           .attr('height', 20)
@@ -96,6 +97,7 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
         setupGraph(element, receiptItems, d);
       } else {
         showDetailedPlot(element, receiptItems, d);
+        updateTable(d);
       }
       d3.event.stopPropagation();
     });
@@ -121,8 +123,9 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
   var maxDate, minDate, numDays;
   function showDetailedPlot(element, receiptItems, d) {
     var filteredEntries = receiptItems.filter(function(x) { return x.friendly_name == d.key; });
+
     var data = d3.nest()
-          .key(function(d) { return d.date; })
+          .key(function(d) { return new Date(d.date); })
           .rollup(function(leaves) {
             var temp = {
               total: d3.sum(leaves, function(d) { return parseFloat(d.total); }),
@@ -151,7 +154,7 @@ angular.module('pda2App').directive('receiptAnalysis', function($rootScope) {
       
     // setup x 
     var xValue = function(d) { return new Date(d.key); }, // data -> value
-        xScale = d3.time.scale().range([0, width]), // value -> display
+        xScale = d3.time.scale.utc().range([0, width]), // value -> display
         xMap = function(d) { return xScale(xValue(d));}, // data -> display
         xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(tickFormat);
     // setup y
